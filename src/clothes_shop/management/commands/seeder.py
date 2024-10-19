@@ -77,8 +77,10 @@ class Command(BaseCommand):
         product_list = Product.objects.all()
 
         for user in user_list:
-            CartItem.objects.get_or_create(
-                user=user, product=random.choice(product_list), quantity=random.randint(1, 5)
-            )
+            cartItems_num = random.randint(1, 10)
+            for _ in range(cartItems_num):
+                CartItem.objects.get_or_create(
+                    user=user, product=random.choice(product_list), quantity=random.randint(1, 5)
+                )
 
         print("Successfully seeded the database using Faker")
