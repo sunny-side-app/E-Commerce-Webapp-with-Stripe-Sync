@@ -239,3 +239,17 @@ class ShippingSerializer(serializers.ModelSerializer):
             "shipping_address",
             "address_code",
         )
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = (
+            "id",
+            "user",
+            "product",
+            "rating",
+            "comment",
+            "created_at",
+            "updated_at",
+        )
