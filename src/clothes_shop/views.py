@@ -47,6 +47,10 @@ logger = logging.getLogger(__name__)
 
 class ProductListView(APIView):
     def get(self, request):
+
+        # 認証ユーザーからのリクエストかを確認
+        is_authenticated = request.user.is_authenticated
+
         size_ids = request.query_params.getlist("size[]")
         target_ids = request.query_params.getlist("target[]")
         clothes_type_ids = request.query_params.getlist("clothes_type[]")
@@ -97,9 +101,22 @@ class ProductListView(APIView):
         paginator.page_size = 10
         paginated_products = paginator.paginate_queryset(products, request)
 
-        serializer = ProductSerializer(paginated_products, many=True)
+        serializer_data = ProductSerializer(paginated_products, many=True).data
 
-        return paginator.get_paginated_response(serializer.data)
+        # 認証ユーザーの場合は、各商品に対して`fav`をチェック
+        if is_authenticated:
+            # ユーザーのお気に入り情報を取得
+            user_favorite_product_ids = set(
+                Favorite.objects.filter(user=request.user).values_list("product_id", flat=True)
+            )
+            for product in serializer_data:
+                product["fav"] = product["id"] in user_favorite_product_ids
+        else:
+            # ゲストユーザーの場合はすべて`fav`を`False`に設定
+            for product in serializer_data:
+                product["fav"] = False
+
+        return paginator.get_paginated_response(serializer_data)
 
     def post(self, request):
         serializer = ProductSerializer(data=request.data)
