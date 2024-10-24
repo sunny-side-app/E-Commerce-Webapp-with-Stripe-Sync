@@ -11,9 +11,22 @@ urlpatterns = [
     # Order API URLs
     path("api/orders/", views.OrderListCreateView.as_view(), name="order-list-create"),
     path("api/orders/<int:pk>/", views.OrderDetailView.as_view(), name="order-detail"),
-    # Rating API URLs
-    path("api/ratings/", views.RatingListCreateView.as_view(), name="rating-list-create"),
-    path("api/ratings/<int:pk>/", views.RatingDetailView.as_view(), name="rating-detail"),
+    # Review API URLs
+    path(
+        "api/product-reviews/<int:product_id>/",
+        views.ProductReviewListView.as_view(),
+        name="product-review-list",
+    ),
+    path(
+        "api/product-reviews/<int:product_id>/user/<int:user_id>/",
+        views.UserProductReviewDetailView.as_view(),
+        name="user-product-review-detail",
+    ),
+    path(
+        "api/user-reviews/<int:user_id>/",
+        views.UserReviewListView.as_view(),
+        name="user-review-list",
+    ),
     # User API URLs
     path("api/users/", views.UserListCreateView.as_view(), name="user-list-create"),
     path("api/users/<int:pk>/", views.UserDetailView.as_view(), name="user-detail"),

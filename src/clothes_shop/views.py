@@ -1,6 +1,5 @@
 import logging
 
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, status
@@ -18,7 +17,7 @@ from .models import (
     OrderItem,
     Payment,
     Product,
-    Rating,
+    Review,
     Shipping,
     Size,
     Target,
@@ -34,7 +33,8 @@ from .serializers import (
     OrderSerializer,
     PaymentSerializer,
     ProductSerializer,
-    RatingSerializer,
+    ReviewListSerializer,
+    ReviewSerializer,
     ShippingSerializer,
     SizeSerializer,
     TargetSerializer,
@@ -157,31 +157,99 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(Order, pk=self.kwargs.get("pk"))
 
 
-class RatingListCreateView(generics.ListCreateAPIView):
-    serializer_class = RatingSerializer
+class ProductReviewListView(generics.ListAPIView):
+    serializer_class = ReviewListSerializer
 
     def get_queryset(self):
-        product_id = self.request.query_params.get("productId")
-        if product_id:
-            return Rating.objects.filter(product_id=product_id)
-        return Rating.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        avg_rating = queryset.aggregate(average=Avg("rating"))["average"]
-        if avg_rating is None:
-            avg_rating = 0
-        serializer = self.get_serializer(queryset.order_by("-created_at"), many=True)
-        response_data = {"average_rating": avg_rating, "comments": serializer.data}
-        return Response(response_data, status=status.HTTP_200_OK)
+        product_id = self.kwargs["product_id"]
+        return Review.objects.filter(product_id=product_id)
 
 
-class RatingDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Rating.objects.all()
-    serializer_class = RatingSerializer
+class UserProductReviewDetailView(APIView):
+    def get_product(self, product_id):
+        try:
+            product = Product.objects.get(pk=product_id)
+            return product
+        except Product.DoesNotExist:
+            errMsg = f"指定されたID {product_id} に紐づく製品が存在しません。"
+            logger.error(errMsg)
+            raise NotFound(detail=errMsg)
+        except Exception as e:
+            errMsg = f"想定外のエラーが発生しました: {str(e)}"
+            logger.error(errMsg)
+            raise APIException(detail=errMsg)
 
-    def get_object(self):
-        return get_object_or_404(Rating, pk=self.kwargs.get("pk"))
+    def get_user(self, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+            return user
+        except User.DoesNotExist:
+            errMsg = f"指定されたID {user_id} に紐づくユーザーが存在しません。"
+            logger.error(errMsg)
+            raise NotFound(detail=errMsg)
+        except Exception as e:
+            errMsg = f"想定外のエラーが発生しました: {str(e)}"
+            logger.error(errMsg)
+            raise APIException(detail=errMsg)
+
+    def get(self, request, *args, **kwargs):
+        product = self.get_product(kwargs["product_id"])
+        user = self.get_user(kwargs["user_id"])
+        review = Review.objects.filter(user_id=user.id, product_id=product.id)
+        serializer = ReviewSerializer(review)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        product = self.get_product(kwargs["product_id"])
+        user = self.get_user(kwargs["user_id"])
+        data = {
+            "user_id": user.id,
+            "product_id": product.id,
+            "rating": request.data["rating"],
+            "comment": request.data["comment"],
+        }
+        serializer = ReviewSerializer(data=data)
+        if serializer.is_valid() is False:
+            logger.error(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        product = self.get_product(kwargs["product_id"])
+        user = self.get_user(kwargs["user_id"])
+        review = Review.objects.filter(user_id=user.id, product_id=product.id)
+        if review.count != 1:
+            errMsg = (
+                f"指定されたレビュー(user_id:{user.id},product_id:{product.id})は存在しません。"
+            )
+            logger.error(errMsg)
+            return Response(errMsg, status=status.HTTP_400_BAD_REQUEST)
+        data = {
+            "rating": request.data["rating"],
+            "comment": request.data["comment"],
+        }
+        serializer = ReviewSerializer(review, data=data, partial=True)
+        if serializer.is_valid() is False:
+            logger.error(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        product = self.get_product(kwargs["product_id"])
+        user = self.get_user(kwargs["user_id"])
+        review = Review.objects.filter(user_id=user.id, product_id=product.id)
+        review.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserReviewListView(generics.ListAPIView):
+    serializer_class = ReviewListSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs["user_id"]
+        return Review.objects.filter(user_id=user_id)
 
 
 class UserListCreateView(generics.ListCreateAPIView):

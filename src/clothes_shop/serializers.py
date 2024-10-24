@@ -136,16 +136,22 @@ class OrderListSerializer(serializers.ListSerializer):
         return [Order(**item) for item in validated_data]
 
 
-# Rating Serializer (for detail view)
-class RatingSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = ("id", "user", "product", "rating", "comment", "created_at")
+        fields = (
+            "id",
+            "user_id",
+            "product_id",
+            "rating",
+            "comment",
+            "created_at",
+            "updated_at",
+        )
 
 
-# Rating List Serializer (for listing ratings)
-class RatingListSerializer(serializers.ListSerializer):
-    child = RatingSerializer()
+class ReviewListSerializer(serializers.ListSerializer):
+    child = ReviewSerializer()
 
     def create(self, validated_data):
         return [Rating(**item) for item in validated_data]
@@ -238,18 +244,4 @@ class ShippingSerializer(serializers.ModelSerializer):
             "shipping_date",
             "shipping_address",
             "address_code",
-        )
-
-
-class RatingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Rating
-        fields = (
-            "id",
-            "user",
-            "product",
-            "rating",
-            "comment",
-            "created_at",
-            "updated_at",
         )
