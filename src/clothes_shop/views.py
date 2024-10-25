@@ -33,7 +33,6 @@ from .serializers import (
     OrderSerializer,
     PaymentSerializer,
     ProductSerializer,
-    ReviewListSerializer,
     ReviewSerializer,
     ShippingSerializer,
     SizeSerializer,
@@ -158,7 +157,7 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ProductReviewListView(generics.ListAPIView):
-    serializer_class = ReviewListSerializer
+    serializer_class = ReviewSerializer
 
     def get_queryset(self):
         product_id = self.kwargs["product_id"]
@@ -195,7 +194,7 @@ class UserProductReviewDetailView(APIView):
     def get(self, request, *args, **kwargs):
         product = self.get_product(kwargs["product_id"])
         user = self.get_user(kwargs["user_id"])
-        review = Review.objects.filter(user_id=user.id, product_id=product.id)
+        review = Review.objects.filter(user_id=user.id, product_id=product.id).first()
         serializer = ReviewSerializer(review)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -203,8 +202,8 @@ class UserProductReviewDetailView(APIView):
         product = self.get_product(kwargs["product_id"])
         user = self.get_user(kwargs["user_id"])
         data = {
-            "user_id": user.id,
-            "product_id": product.id,
+            "user": user.id,
+            "product": product.id,
             "rating": request.data["rating"],
             "comment": request.data["comment"],
         }
@@ -218,8 +217,8 @@ class UserProductReviewDetailView(APIView):
     def put(self, request, *args, **kwargs):
         product = self.get_product(kwargs["product_id"])
         user = self.get_user(kwargs["user_id"])
-        review = Review.objects.filter(user_id=user.id, product_id=product.id)
-        if review.count != 1:
+        review = Review.objects.filter(user_id=user.id, product_id=product.id).first()
+        if review is None:
             errMsg = (
                 f"指定されたレビュー(user_id:{user.id},product_id:{product.id})は存在しません。"
             )
@@ -239,13 +238,13 @@ class UserProductReviewDetailView(APIView):
     def delete(self, request, *args, **kwargs):
         product = self.get_product(kwargs["product_id"])
         user = self.get_user(kwargs["user_id"])
-        review = Review.objects.filter(user_id=user.id, product_id=product.id)
+        review = Review.objects.filter(user_id=user.id, product_id=product.id).first()
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserReviewListView(generics.ListAPIView):
-    serializer_class = ReviewListSerializer
+    serializer_class = ReviewSerializer
 
     def get_queryset(self):
         user_id = self.kwargs["user_id"]
@@ -510,8 +509,6 @@ class BrandDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class CategoryListView(APIView):
     def get(self, request):
-
-        # 全４種のカテゴリのデータを全て返す
         sizes = Size.objects.all()
         targets = Target.objects.all()
         clothes_types = ClothesType.objects.all()
@@ -522,12 +519,10 @@ class CategoryListView(APIView):
         clothes_type_serializer = ClothesTypeSerializer(clothes_types, many=True)
         brand_serializer = BrandSerializer(brands, many=True)
 
-        # すべてのカテゴリデータをまとめて返す
         data = {
             "sizeCatgory": size_serializer.data,
             "targetCatgory": target_serializer.data,
             "typeCatgory": clothes_type_serializer.data,
             "brandCatgory": brand_serializer.data,
         }
-
         return Response(data, status=status.HTTP_200_OK)

@@ -137,8 +137,8 @@ class Shipping(models.Model):
 
 
 class Review(models.Model):
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    product_id = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -146,6 +146,6 @@ class Review(models.Model):
 
     class Meta:
         unique_together = (
-            "user_id",
-            "product_id",
+            "user",
+            "product",
         )
