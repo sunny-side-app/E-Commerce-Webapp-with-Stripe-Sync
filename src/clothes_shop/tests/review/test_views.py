@@ -89,11 +89,11 @@ class ReviewTests(APITestCase):
         product_review_list_url = reverse(
             "clothes_shop:product-review-list", kwargs={"product_id": self.product_1.id}
         )
-        response = self.client.get(product_review_list_url)
+        response = self.client.get(f"{product_review_list_url}?page=1")
         review = Review.objects.filter(product_id=self.product_1.id)
         serializer = ReviewSerializer(review, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data["results"], serializer.data)
 
     def test_get_user_review_list(self):
         user_review_list_url = reverse(
@@ -103,7 +103,7 @@ class ReviewTests(APITestCase):
         review = Review.objects.filter(user_id=self.user_1.id)
         serializer = ReviewSerializer(review, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data["results"], serializer.data)
 
     def test_get_detail_review(self):
         detail_url = reverse(
