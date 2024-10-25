@@ -48,8 +48,10 @@ logger = logging.getLogger(__name__)
 class ProductListView(APIView):
     def get(self, request):
 
+        # TODO 以下、認証機能完成後、解放
         # 認証ユーザーからのリクエストかを確認
-        is_authenticated = request.user.is_authenticated
+        # is_authenticated = request.user.is_authenticated
+        user_id = request.query_params.get("user_id")
 
         size_ids = request.query_params.getlist("size[]")
         target_ids = request.query_params.getlist("target[]")
@@ -104,10 +106,11 @@ class ProductListView(APIView):
         serializer_data = ProductSerializer(paginated_products, many=True).data
 
         # 認証ユーザーの場合は、各商品に対して`fav`をチェック
-        if is_authenticated:
+        # if is_authenticated:
+        if user_id:
             # ユーザーのお気に入り情報を取得
             user_favorite_product_ids = set(
-                Favorite.objects.filter(user=request.user).values_list("product_id", flat=True)
+                Favorite.objects.filter(user=user_id).values_list("product_id", flat=True)
             )
             for product in serializer_data:
                 product["fav"] = product["id"] in user_favorite_product_ids
@@ -142,9 +145,22 @@ class ProductDetailView(APIView):
             raise APIException(detail=errMsg)
 
     def get(self, request, *args, **kwargs):
+        # TODO 以下、認証機能完成後、解放
+        # 認証ユーザーからのリクエストかを確認
+        # is_authenticated = request.user.is_authenticated
+        user_id = request.query_params.get("user_id")
         product = self.get_product(kwargs.get("pk"))
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
+        serializer_data = ProductSerializer(product).data
+
+        if user_id:
+            # ユーザーのお気に入り情報を取得
+            user_favorite_product_ids = set(
+                Favorite.objects.filter(user=user_id).values_list("product_id", flat=True)
+            )
+            serializer_data["fav"] = serializer_data["id"] in user_favorite_product_ids
+        else:
+            serializer_data["fav"] = False
+        return Response(serializer_data)
 
     def put(self, request, *args, **kwargs):
         product = self.get_product(kwargs.get("pk"))
