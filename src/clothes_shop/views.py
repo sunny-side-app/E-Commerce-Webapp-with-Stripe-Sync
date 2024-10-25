@@ -86,7 +86,6 @@ class ProductListView(APIView):
                 )
 
         products = Product.objects.filter(**filters).order_by("-release_date")
-
         if keyword:
             products = products.filter(name__icontains=keyword) | products.filter(
                 description__icontains=keyword
@@ -97,7 +96,6 @@ class ProductListView(APIView):
         paginated_products = paginator.paginate_queryset(products, request)
 
         serializer = ProductSerializer(paginated_products, many=True)
-
         return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
@@ -156,12 +154,15 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return get_object_or_404(Order, pk=self.kwargs.get("pk"))
 
 
-class ProductReviewListView(generics.ListAPIView):
-    serializer_class = ReviewSerializer
-
-    def get_queryset(self):
+class ProductReviewListView(APIView):
+    def get(self, request, *args, **kwargs):
         product_id = self.kwargs["product_id"]
-        return Review.objects.filter(product_id=product_id)
+        reviews = Review.objects.filter(product_id=product_id)
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginated_reviews = paginator.paginate_queryset(reviews, request)
+        serializer = ReviewSerializer(paginated_reviews, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class UserProductReviewDetailView(APIView):
@@ -243,12 +244,15 @@ class UserProductReviewDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserReviewListView(generics.ListAPIView):
-    serializer_class = ReviewSerializer
-
-    def get_queryset(self):
+class UserReviewListView(APIView):
+    def get(self, request, *args, **kwargs):
         user_id = self.kwargs["user_id"]
-        return Review.objects.filter(user_id=user_id)
+        reviews = Review.objects.filter(user_id=user_id)
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginated_reviews = paginator.paginate_queryset(reviews, request)
+        serializer = ReviewSerializer(paginated_reviews, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class UserListCreateView(generics.ListCreateAPIView):
