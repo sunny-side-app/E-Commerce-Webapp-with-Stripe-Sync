@@ -2,13 +2,6 @@
 
 /django/wait-for-it.sh db:3306 -t 0
 
-if /django/venv/bin/python3 manage.py makemigrations --noinput; then
-    echo "Migrations created successfully."
-else
-    echo "Failed to create migrations." >&2
-    exit 1
-fi
-
 if /django/venv/bin/python3 manage.py migrate; then
     echo "Migration done successfully."
 else

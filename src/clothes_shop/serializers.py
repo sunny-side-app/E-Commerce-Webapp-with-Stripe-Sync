@@ -124,12 +124,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ("order", "product", "quantity", "unit_price", "created_at", "updated_at")
 
-class OrderSerializer(serializers.ModelSerializer):# Order一覧のみ取得したい場合用
+class OrderSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ("id", "user", "order_date", "order_status", "total_price")
 
-class OrderDetailSerializer(serializers.ModelSerializer):# 注文詳細も取得したい場合用
+class OrderWithItemsSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True)
     class Meta:
         model = Order
@@ -149,7 +149,7 @@ class RatingListSerializer(serializers.ListSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "first_name", "last_name", "email", "role", "address")
+        fields = ("id", "user_name", "email", "role", "address")
 
 class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:

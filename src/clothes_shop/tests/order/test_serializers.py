@@ -1,8 +1,8 @@
 from django.test import TestCase
 from clothes_shop.models import Order, User
-from clothes_shop.serializers import OrderSerializer, OrderDetailSerializer
+from clothes_shop.serializers import OrderSummarySerializer(, OrderWithItemsSerializer
 
-class OrderSerializerTest(TestCase):
+class OrderSummarySerializer(Test(TestCase):
     
     def setUp(self):
         self.user = User.objects.create(
@@ -16,7 +16,7 @@ class OrderSerializerTest(TestCase):
             order_status="pending",
             total_price=100.00
         )
-        self.order_serializer = OrderSerializer(self.order)
+        self.order_serializer = OrderSummarySerializer((self.order)
     
     def test_order_serializer_contains_expected_fields(self):
         self.assertEqual(
@@ -28,7 +28,7 @@ class OrderSerializerTest(TestCase):
         self.assertEqual(self.order_serializer.data["order_status"], self.order.order_status)
 
 
-class OrderDetailSerializerTest(TestCase):
+class OrderWithItemsSerializerTest(TestCase):
     
     def setUp(self):
         self.user = User.objects.create(
@@ -42,7 +42,7 @@ class OrderDetailSerializerTest(TestCase):
             order_status="pending",
             total_price=100.00
         )
-        self.order_detail_serializer = OrderDetailSerializer(self.order)
+        self.order_detail_serializer = OrderWithItemsSerializer(self.order)
     
     def test_order_detail_serializer_contains_expected_fields(self):
         self.assertEqual(

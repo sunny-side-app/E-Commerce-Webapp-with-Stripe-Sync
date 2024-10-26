@@ -30,9 +30,9 @@ from .serializers import (
     CartItemSerializer,
     ClothesTypeSerializer,
     FavoriteSerializer,
-    OrderDetailSerializer,
+    OrderWithItemsSerializer,
     OrderItemSerializer,
-    OrderSerializer,
+    OrderSummarySerializer,
     PaymentSerializer,
     ProductSerializer,
     RatingSerializer,
@@ -144,8 +144,8 @@ class ProductDetailView(APIView):
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class OrderListCreateView(generics.ListCreateAPIView): # Order一覧のみを取得
-    serializer_class = OrderSerializer
+class OrderListCreateView(generics.ListCreateAPIView):
+    serializer_class = OrderSummarySerializer
 
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
@@ -153,15 +153,15 @@ class OrderListCreateView(generics.ListCreateAPIView): # Order一覧のみを取
             return Order.objects.filter(user_id=user_id).order_by('-order_date')
         return Order.objects.all().order_by('-order_date')
 
-class OrderDetailView(generics.RetrieveUpdateDestroyAPIView): # Order詳細(OrderItemも含む)を取得
+class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
-    serializer_class = OrderDetailSerializer
+    serializer_class = OrderWithItemsSerializer
 
     def get_object(self):
         return get_object_or_404(Order, pk=self.kwargs.get("pk"))
 
-class OrderWithItemsListView(generics.ListAPIView):  # Orderとその詳細(OrderItem, Product)を取得
-    serializer_class = OrderDetailSerializer
+class OrderWithItemsListView(generics.ListAPIView):
+    serializer_class = OrderWithItemsSerializer
 
     def get_queryset(self):
         user_id = self.request.query_params.get('user_id')
