@@ -13,6 +13,20 @@ from clothes_shop.serializers import ProductSerializer
 logger = logging.getLogger(__name__)
 
 
+def get_product(product_id):
+    try:
+        product = Product.objects.get(pk=product_id)
+        return product
+    except Product.DoesNotExist:
+        errMsg = f"指定されたID {product_id} に紐づく製品が存在しません。"
+        logger.error(errMsg)
+        raise NotFound(detail=errMsg)
+    except Exception as e:
+        errMsg = f"想定外のエラーが発生しました: {str(e)}"
+        logger.error(errMsg)
+        raise APIException(detail=errMsg)
+
+
 class ProductListView(APIView):
     def get(self, request):
         size_ids = request.query_params.getlist("size[]")
@@ -75,28 +89,26 @@ class ProductListView(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def delete(self, request):
+        product_ids = request.data["product_ids"]
+        for product_id in product_ids:
+            try:
+                product = get_product(product_id)
+                product.delete()
+            except Exception:
+                errMsg = f"指定されたID {product_id} の削除に失敗しました。"
+                logger.error(errMsg)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ProductDetailView(APIView):
-    def get_product(self, pk):
-        try:
-            product = Product.objects.get(pk=pk)
-            return product
-        except Product.DoesNotExist:
-            errMsg = f"指定されたID {pk} に紐づく製品が存在しません。"
-            logger.error(errMsg)
-            raise NotFound(detail=errMsg)
-        except Exception as e:
-            errMsg = f"想定外のエラーが発生しました: {str(e)}"
-            logger.error(errMsg)
-            raise APIException(detail=errMsg)
-
     def get(self, request, *args, **kwargs):
-        product = self.get_product(kwargs.get("pk"))
+        product = get_product(kwargs.get("pk"))
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
-        product = self.get_product(kwargs.get("pk"))
+        product = get_product(kwargs.get("pk"))
         serializer = ProductSerializer(product, data=request.data, partial=True)
         if not serializer.is_valid():
             logger.error(serializer.errors)
@@ -105,6 +117,6 @@ class ProductDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
-        product = self.get_product(kwargs.get("pk"))
+        product = get_product(kwargs.get("pk"))
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
