@@ -9,7 +9,7 @@ from .models import (
     OrderItem,
     Payment,
     Product,
-    Rating,
+    Review,
     Shipping,
     Size,
     Target,
@@ -136,19 +136,18 @@ class OrderListSerializer(serializers.ListSerializer):
         return [Order(**item) for item in validated_data]
 
 
-# Rating Serializer (for detail view)
-class RatingSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Rating
-        fields = ("id", "user", "product", "rating", "comment", "created_at")
-
-
-# Rating List Serializer (for listing ratings)
-class RatingListSerializer(serializers.ListSerializer):
-    child = RatingSerializer()
-
-    def create(self, validated_data):
-        return [Rating(**item) for item in validated_data]
+        model = Review
+        fields = (
+            "id",
+            "user",
+            "product",
+            "rating",
+            "comment",
+            "created_at",
+            "updated_at",
+        )
 
 
 # User Serializer
