@@ -120,6 +120,8 @@ class ProductSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+
     class Meta:
         model = OrderItem
         fields = ("order", "product", "quantity", "unit_price", "created_at", "updated_at")
