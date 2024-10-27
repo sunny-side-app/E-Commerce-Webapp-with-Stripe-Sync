@@ -94,11 +94,16 @@ class ProductListView(APIView):
         for product_id in product_ids:
             try:
                 product = get_product(product_id)
-                product.delete()
+                product.is_deleted = True
+                serializer = ProductSerializer(product, data=request.data, partial=True)
+                if not serializer.is_valid():
+                    logger.error(serializer.errors)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                serializer.save()
             except Exception:
                 errMsg = f"指定されたID {product_id} の削除に失敗しました。"
                 logger.error(errMsg)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
 
 
 class ProductDetailView(APIView):
