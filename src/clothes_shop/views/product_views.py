@@ -91,18 +91,7 @@ class ProductListView(APIView):
 
     def delete(self, request):
         product_ids = request.data["product_ids"]
-        for product_id in product_ids:
-            try:
-                product = get_product(product_id)
-                product.is_deleted = True
-                serializer = ProductSerializer(product, data=request.data, partial=True)
-                if not serializer.is_valid():
-                    logger.error(serializer.errors)
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                serializer.save()
-            except Exception:
-                errMsg = f"指定されたID {product_id} の削除に失敗しました。"
-                logger.error(errMsg)
+        Product.objects.filter(id__in=product_ids).update(is_deleted=True)
         return Response(status=status.HTTP_200_OK)
 
 
