@@ -22,6 +22,8 @@ MYSQL_HOST=localhost
 MYSQL_PORT=3306
 MYSQL_ENGINE=django.db.backends.mysql
 DJANGO_LOG_LEVEL=＜ログレベル＞
+STRIPE_SECRET_KEY=xxx...
+STRIPE_ENDPOINT_SECRET=xxx...
 ```
 
 # 開発手順
