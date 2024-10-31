@@ -23,7 +23,7 @@ class StripeService:
     def update_product(self, id: string, product_data: stripe.Product):
         return stripe.Product.modify(id, **product_data)
 
-    def retrieve_product(self, id: string):
+    def get_product(self, id: string):
         return stripe.Product.retrieve(id)
 
     def delete_product(self, id: string):

@@ -13,7 +13,7 @@ isFileChanged: bool = False
     isFileChanged,
     "テストで登録した製品データをテスト内で物理削除できないので、変更があったとき以外は実行しない。",
 )
-class ProductTests(APITestCase):
+class StripeServiceTests(APITestCase):
     def setUp(self):
         self.stripe_service = StripeService()
 
