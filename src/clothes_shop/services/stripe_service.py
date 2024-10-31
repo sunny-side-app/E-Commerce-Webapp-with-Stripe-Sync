@@ -1,3 +1,4 @@
+import logging
 import os
 import string
 from pathlib import Path
@@ -9,6 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 env.read_env(os.path.join(os.path.dirname(BASE_DIR), ".env"))
 
+logger = logging.getLogger(__name__)
+
 
 class StripeService:
     def __init__(self):
@@ -17,14 +20,13 @@ class StripeService:
     def create_product(self, product_data: stripe.Product):
         return stripe.Product.create(**product_data)
 
-    def update_product(self, product_data: stripe.Product):
-        return stripe.Product.modify(**product_data)
+    def update_product(self, id: string, product_data: stripe.Product):
+        return stripe.Product.modify(id, **product_data)
 
     def retrieve_product(self, id: string):
-        return stripe.Product.retrieve(id=id)
-
-    def list_all_product(self):
-        return stripe.Product.list(limit=10)
+        return stripe.Product.retrieve(id)
 
     def delete_product(self, id: string):
-        return stripe.Product.delete(id=id)
+        # 製品登録時にpriceオブジェクトを生成すると、APIリクエストでは物理削除できなくなる。
+        # active=Falseにすることで、archivedにできる。（論理削除）
+        return stripe.Product.modify(id, active=False)
