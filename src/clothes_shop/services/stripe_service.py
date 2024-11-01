@@ -17,16 +17,46 @@ class StripeService:
     def __init__(self):
         stripe.api_key = env("STRIPE_SECRET_KEY")
 
-    def create_product(self, product_data: stripe.Product):
-        return stripe.Product.create(**product_data)
+    def create_product(self, name: string, price: int) -> string:
+        product: stripe.Product = stripe.Product.create(name=name)
+        stripe.Price.create(
+            product=product.id,
+            unit_amount=price,
+            tax_behavior="exclusive",
+            currency="jpy",
+        )
+        return product.id
 
-    def update_product(self, id: string, product_data: stripe.Product):
-        return stripe.Product.modify(id, **product_data)
+    def update_product(self, product_id: str, newName: str | None, newPrice: int | None) -> None:
+        if newName is None and newPrice is None:
+            return None
+        if newName is not None:
+            stripe.Product.modify(id=product_id, name=newName)
+        if newPrice is not None:
+            resp: stripe.ListObject[stripe.Price] = stripe.Price.list(
+                active=True, product=product_id
+            )
+            for price in resp.data:
+                stripe.Price.modify(price.id, active=False)
+            stripe.Price.create(
+                product=product_id,
+                unit_amount=newPrice,
+                tax_behavior="exclusive",
+                currency="jpy",
+            )
+        return None
 
-    def get_product(self, id: string):
-        return stripe.Product.retrieve(id)
+    def get_product(self, product_id: str) -> stripe.Product | None:
+        product = stripe.Product.retrieve(product_id)
+        return product if product.active is True else None
 
-    def delete_product(self, id: string):
-        # 製品登録時にpriceオブジェクトを生成すると、APIリクエストでは物理削除できなくなる。
-        # active=Falseにすることで、archivedにできる。（論理削除）
-        return stripe.Product.modify(id, active=False)
+    def __get_price(self, product_id: str) -> stripe.Price:
+        resp: stripe.ListObject[stripe.Price] = stripe.Price.list(active=True, product=product_id)
+        price: stripe.Price = resp.data[0]
+        return price
+
+    def delete_product(self, id: string) -> None:
+        # 製品登録時にpriceオブジェクトを生成すると、APIリクエストでは物理削除できない。
+        # active=Falseにすることで、archivedにする。（論理削除）
+        stripe.Product.modify(id, active=False)
+        return None

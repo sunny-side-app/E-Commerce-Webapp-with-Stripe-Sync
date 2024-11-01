@@ -6,7 +6,7 @@ from clothes_shop.services.stripe_service import StripeService
 
 # ファイルに変更があってテストが必要な場合だけTrueに変更する
 # テストが終了したらFalseに戻すこと
-isFileChanged: bool = False
+isFileChanged: bool = True
 
 
 @unittest.skipUnless(
@@ -18,33 +18,17 @@ class StripeServiceTests(APITestCase):
         self.stripe_service = StripeService()
 
     def test_CRUD(self):
-        price_data = {"currency": "jpy", "tax_behavior": "inclusive", "unit_amount": 2500}
-        test_product = {
-            "name": "Test Cloth",
-            "active": True,
-            "description": "test description",
-            "metadata": {},
-            "default_price_data": price_data,
-            "images": [],
-            "marketing_features": [],
-            "package_dimensions": None,
-            "shippable": True,
-            "statement_descriptor": "hogehoge",
-            "tax_code": "txcd_99999999",
-            "unit_label": "着",
-            "url": "example.com",
-        }
-        product = self.stripe_service.create_product(test_product)
-        self.assertEqual(test_product["name"], product.name)
+        price = 2500
+        product_name = "Test Cloth"
+        product_id = self.stripe_service.create_product(product_name, price)
 
-        test_product_updated = {"name": "Test Cloth Updated"}
-        product_updated = self.stripe_service.update_product(product.id, test_product_updated)
-        self.assertEqual(test_product_updated["name"], product_updated.name)
+        product_name_updated = "Test Cloth Updated"
+        price_updated = 10000
+        self.stripe_service.update_product(product_id, product_name_updated, price_updated)
 
-        product_retrieved = self.stripe_service.retrieve_product(product_updated.id)
-        self.assertEqual(test_product_updated["name"], product_retrieved.name)
-        self.assertEqual(test_product["description"], product_retrieved.description)
+        product = self.stripe_service.get_product(product_id)
+        self.assertEqual(product_name_updated, product.name)
 
-        product_deleted = self.stripe_service.delete_product(product_retrieved.id)
-        self.assertEqual(product_deleted["id"], product_retrieved.id)
-        self.assertFalse(product_deleted["active"])
+        self.stripe_service.delete_product(product_id)
+        product_deleted = self.stripe_service.get_product(product_id)
+        self.assertIsNone(product_deleted)
