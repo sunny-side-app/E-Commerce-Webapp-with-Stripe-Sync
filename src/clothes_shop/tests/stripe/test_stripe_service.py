@@ -6,7 +6,7 @@ from clothes_shop.services.stripe_service import StripeService
 
 # ファイルに変更があってテストが必要な場合だけTrueに変更する
 # テストが終了したらFalseに戻すこと
-isFileChanged: bool = True
+isFileChanged: bool = False
 
 
 @unittest.skipUnless(
