@@ -26,6 +26,8 @@ STRIPE_SECRET_KEY=xxx...
 STRIPE_ENDPOINT_SECRET=xxx...
 CHECKOUT_URL_SUCCESS=＜決済成功後に遷移する画面URL＞
 CHECKOUT_URL_CANCEL=＜決済キャンセル時に遷移する画面URL＞
+DEMO_PRODUCT_COUNT=＜デモ製品データ数＞
+DEMO_USER_COUNT=＜デモユーザーデータ数＞
 ```
 
 # 開発手順
