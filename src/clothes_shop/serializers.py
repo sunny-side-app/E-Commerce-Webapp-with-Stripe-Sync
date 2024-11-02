@@ -62,6 +62,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             "id",
+            "stripe_product_id",
             "name",
             "description",
             "price",
@@ -82,6 +83,7 @@ class ProductSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
+            "stripe_product_id",
             "created_at",
             "updated_at",
         )

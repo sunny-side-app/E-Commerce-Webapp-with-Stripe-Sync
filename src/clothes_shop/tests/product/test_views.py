@@ -7,6 +7,9 @@ from rest_framework.test import APITestCase
 
 from clothes_shop.models import Brand, ClothesType, Product, Size, Target
 from clothes_shop.serializers import ProductSerializer
+from clothes_shop.services.stripe_service import StripeService
+
+stripe_service = StripeService()
 
 
 class ProductTests(APITestCase):
@@ -29,6 +32,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id=stripe_service.create_product("テスト用につくったシャツ１", 100),
         )
         self.product_2 = Product.objects.create(
             size=self.size,
@@ -42,6 +46,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id=stripe_service.create_product("テスト用につくったシャツ２", 100),
         )
         self.list_url = reverse("clothes_shop:product-list")
         self.detail_url = reverse("clothes_shop:product-detail", kwargs={"pk": self.product_1.id})
@@ -57,7 +62,7 @@ class ProductTests(APITestCase):
         data = {
             "name": "test",
             "description": "hello",
-            "price": 100.02,
+            "price": 1200,
             "stock_quantity": 10,
             "release_date": self.one_week_ago,
             "size_pk": self.size.id,
@@ -72,7 +77,7 @@ class ProductTests(APITestCase):
         self.assertEqual(Product.objects.count(), 3)
         self.assertEqual(product_created.name, "test")
         self.assertEqual(product_created.description, "hello")
-        self.assertEqual(float(product_created.price), 100.02)
+        self.assertEqual(float(product_created.price), 1200)
         self.assertEqual(product_created.stock_quantity, 10)
         self.assertEqual(product_created.release_date, self.one_week_ago)
         self.assertEqual(product_created.size.name, "XL")

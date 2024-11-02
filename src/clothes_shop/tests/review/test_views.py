@@ -32,6 +32,7 @@ class ReviewTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_1",
         )
         self.product_2 = Product.objects.create(
             size=self.size,
@@ -45,6 +46,7 @@ class ReviewTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_2",
         )
         self.user_1 = User.objects.create(
             name="たろう",
@@ -209,6 +211,7 @@ class ReviewTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_3",
         )
         detail_url = reverse(
             "clothes_shop:user-product-review-detail",
