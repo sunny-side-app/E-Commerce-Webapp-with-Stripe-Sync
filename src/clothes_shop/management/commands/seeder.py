@@ -67,10 +67,12 @@ class Command(BaseCommand):
 
             User.objects.get_or_create(
                 name=fake.name(),
-                email_address=fake.email(),
-                role=role_val,
-                email_validated_at=timezone.now(),
-                address=fake.address(),
+                defaults={  # 重複がない場合のみこれを使って新規作成
+                    'email_address': fake.email(),
+                    'role': role_val,
+                    'email_validated_at': timezone.now(),
+                    'address': fake.address(),
+                }
             )
 
         user_list = User.objects.all()

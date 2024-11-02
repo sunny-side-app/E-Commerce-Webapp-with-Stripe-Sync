@@ -166,6 +166,9 @@ DATABASES = {
         "PASSWORD": env("MYSQL_APP_USER_PASSWORD"),
         "HOST": env("MYSQL_HOST"),
         "PORT": env("MYSQL_PORT"),
+        'TEST': {
+            'NAME': env("MYSQL_TEST_DB_NAME"),
+        },
     }
 }
 
@@ -217,3 +220,5 @@ CORS_ALLOW_ALL_ORIGINS = True
 REST_FRAMEWORK = {
     "COERCE_DECIMAL_TO_STRING": False,
 }
+
+AUTH_USER_MODEL = 'clothes_shop.User'
