@@ -65,15 +65,19 @@ class Command(BaseCommand):
             if i == 1 or i == 2:
                 role_val = "admin"
 
-            User.objects.get_or_create(
+            user, created = User.objects.get_or_create(
                 name=fake.name(),
                 defaults={  # 重複がない場合のみこれを使って新規作成
-                    'email_address': fake.email(),
+                    'email': fake.email(),
                     'role': role_val,
                     'email_validated_at': timezone.now(),
                     'address': fake.address(),
                 }
             )
+
+            if created:
+                user.set_password("password")  # 任意のデフォルトパスワードを設定
+                user.save()
 
         user_list = User.objects.all()
         product_list = Product.objects.all()
