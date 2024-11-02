@@ -1,4 +1,7 @@
+import random
+import string
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.urls import reverse
 from django.utils import timezone
@@ -14,6 +17,25 @@ stripe_service = StripeService()
 
 class ProductTests(APITestCase):
     def setUp(self):
+        self.create_product_patcher = patch(
+            "clothes_shop.services.stripe_service.StripeService.create_product",
+            return_value="test",
+        )
+        self.update_product_patcher = patch(
+            "clothes_shop.services.stripe_service.StripeService.update_product", return_value=None
+        )
+        self.delete_product_patcher = patch(
+            "clothes_shop.services.stripe_service.StripeService.delete_product", return_value=None
+        )
+
+        self.mock_create_product = self.create_product_patcher.start()
+        self.mock_update_product = self.update_product_patcher.start()
+        self.mock_delete_product = self.delete_product_patcher.start()
+
+        self.addCleanup(self.create_product_patcher.stop)
+        self.addCleanup(self.update_product_patcher.stop)
+        self.addCleanup(self.delete_product_patcher.stop)
+
         self.size = Size.objects.create(name="XL")
         self.target = Target.objects.create(name="メンズ")
         self.cloth_type = ClothesType.objects.create(name="シャツ")
@@ -32,7 +54,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
-            stripe_product_id=stripe_service.create_product("テスト用につくったシャツ１", 100),
+            stripe_product_id="product_1",
         )
         self.product_2 = Product.objects.create(
             size=self.size,
@@ -46,7 +68,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
-            stripe_product_id=stripe_service.create_product("テスト用につくったシャツ２", 100),
+            stripe_product_id="product_2",
         )
         self.list_url = reverse("clothes_shop:product-list")
         self.detail_url = reverse("clothes_shop:product-detail", kwargs={"pk": self.product_1.id})
