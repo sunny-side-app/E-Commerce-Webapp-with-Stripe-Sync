@@ -9,8 +9,10 @@ from rest_framework.views import APIView
 
 from clothes_shop.models import Product
 from clothes_shop.serializers import ProductSerializer
+from clothes_shop.services.stripe_service import StripeService
 
 logger = logging.getLogger(__name__)
+stripe_service = StripeService()
 
 
 def get_product(product_id):
@@ -86,12 +88,23 @@ class ProductListView(APIView):
         if serializer.is_valid() is False:
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        stripe_product_id = stripe_service.create_product(
+            request.data["name"], request.data["price"]
+        )
+        try:
+            serializer.save(stripe_product_id=stripe_product_id)
+        except Exception as e:
+            logger.error(e)
+            stripe_service.delete_product(stripe_product_id)
+            raise e
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
         product_ids = request.data["product_ids"]
         Product.objects.filter(id__in=product_ids).update(is_deleted=True)
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            stripe_service.delete_product(product.stripe_product_id)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -107,10 +120,16 @@ class ProductDetailView(APIView):
         if not serializer.is_valid():
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        stripe_service.update_product(
+            product.stripe_product_id,
+            serializer.validated_data["name"],
+            serializer.validated_data["price"],
+        )
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
         product = get_product(kwargs.get("pk"))
+        stripe_service.delete_product(product.stripe_product_id)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
