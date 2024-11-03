@@ -4,7 +4,10 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from clothes_shop.serializers import CheckoutListSerializer, CheckoutSerializer
+from clothes_shop.serializers.checkout_serializers import (
+    CheckoutListSerializer,
+    CheckoutSerializer,
+)
 from clothes_shop.services.stripe_service import CheckoutData, StripeService
 from clothes_shop.views.product_views import get_product
 

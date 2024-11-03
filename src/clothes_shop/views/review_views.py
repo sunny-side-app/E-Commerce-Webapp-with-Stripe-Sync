@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from clothes_shop.models.product import Product
 from clothes_shop.models.user import User
 from clothes_shop.models.user_interaction import Review
-from clothes_shop.serializers import ReviewSerializer
+from clothes_shop.serializers.user_interaction_serializers import ReviewSerializer
 
 logger = logging.getLogger(__name__)
 

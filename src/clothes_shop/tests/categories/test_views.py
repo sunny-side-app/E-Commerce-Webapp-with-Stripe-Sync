@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
-from clothes_shop.serializers import (
+from clothes_shop.serializers.attributes_serializers import (
     BrandSerializer,
     ClothesTypeSerializer,
     SizeSerializer,
@@ -12,22 +12,15 @@ from clothes_shop.serializers import (
 
 
 class CategoryListTests(APITestCase):
-
     def setUp(self):
-        # 各カテゴリのテストデータを作成
         self.size = Size.objects.create(name="L")
         self.target = Target.objects.create(name="メンズ")
         self.cloth_type = ClothesType.objects.create(name="シャツ")
         self.brand = Brand.objects.create(name="NIKE")
-
-        # CategoryListView のURLを取得
         self.category_list_url = reverse("clothes_shop:category-list")
 
     def test_get_category_list(self):
-        # GETリクエストを送信
         response = self.client.get(self.category_list_url)
-
-        # それぞれのカテゴリデータをシリアライズ
         sizes = Size.objects.all()
         targets = Target.objects.all()
         clothes_types = ClothesType.objects.all()
@@ -38,7 +31,6 @@ class CategoryListTests(APITestCase):
         clothes_type_serializer = ClothesTypeSerializer(clothes_types, many=True)
         brand_serializer = BrandSerializer(brands, many=True)
 
-        # 期待されるデータ
         expected_data = {
             "sizeCatgory": size_serializer.data,
             "targetCatgory": target_serializer.data,
@@ -46,6 +38,5 @@ class CategoryListTests(APITestCase):
             "brandCatgory": brand_serializer.data,
         }
 
-        # ステータスコードとレスポンスデータの検証
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)

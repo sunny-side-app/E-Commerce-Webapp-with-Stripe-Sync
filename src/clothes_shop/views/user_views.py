@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 
 from clothes_shop.models.user import User
-from clothes_shop.serializers import UserSerializer
+from clothes_shop.serializers.user_serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
 

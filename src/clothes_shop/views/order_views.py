@@ -4,7 +4,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 
 from clothes_shop.models.order import Order, OrderItem
-from clothes_shop.serializers import OrderItemSerializer, OrderSerializer
+from clothes_shop.serializers.order_serializers import (
+    OrderItemSerializer,
+    OrderSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
