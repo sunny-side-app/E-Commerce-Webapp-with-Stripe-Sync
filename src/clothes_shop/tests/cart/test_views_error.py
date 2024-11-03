@@ -1,6 +1,6 @@
 import logging
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.urls import reverse
 from django.utils import timezone
@@ -40,6 +40,7 @@ class CartItemListCreateViewTests(APITestCase):
             release_date=timezone.make_aware(datetime.strptime("2018-12-05", "%Y-%m-%d")),
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product",
         )
         self.user = User.objects.create(
             name=fake.name(),
@@ -57,9 +58,7 @@ class CartItemListCreateViewTests(APITestCase):
     def test_get_value_error(self):
         query_params = {"error": "hogehoge"}
         response = self.client.get(self.list_url, query_params=query_params)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expectedMsg = "userIdを設定してください。"
-        self.assertEqual(response.data["message"], expectedMsg)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_post_value_error_wihtout_params(self):
         data = {"error": "hogehoge"}

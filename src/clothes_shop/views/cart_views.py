@@ -1,38 +1,13 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-from rest_framework import generics
-
-from clothes_shop.models import CartItem
-from clothes_shop.serializers import CartItemSerializer
-
-logger = logging.getLogger(__name__)
-
-
-class CartItemListCreateView(generics.ListCreateAPIView):
-    queryset = CartItem.objects.all()
-    serializer_class = CartItemSerializer
-
-
-class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = CartItem.objects.all()
-    serializer_class = CartItemSerializer
-
-    def get_object(self):
-        return get_object_or_404(CartItem, pk=self.kwargs.get("pk"))
-
-
-import logging
-
-from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.exceptions import APIException, NotFound
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from clothes_shop.models import CartItem, Product, User
-from clothes_shop.serializers import CartItemSerializer
+from clothes_shop.serializers.cart_serializers import CartItemSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +16,6 @@ class CartItemListCreateView(APIView):
     def get(self, request):
         # TODO　ログインユーザーで取得するようにする
         userId = request.query_params.get("user")
-
         filters = {}
         if userId:
             filters["user_id"] = userId
@@ -49,15 +23,11 @@ class CartItemListCreateView(APIView):
             errMsg = "userIdを設定してください。"
             logger.error(errMsg)
             raise NotFound(detail=errMsg)
-
         cartItems = CartItem.objects.filter(**filters).order_by("-created_at")
-
         serializer = CartItemSerializer(cartItems, many=True)
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-
         user_id = request.data.get("user_id")
         product_id = request.data.get("product_id")
         quantity = request.data.get("quantity")
@@ -68,10 +38,9 @@ class CartItemListCreateView(APIView):
                 {"message": errMsg},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
         try:
-            user = User.objects.get(pk=user_id)
-            product = Product.objects.get(pk=product_id)
+            User.objects.get(pk=user_id)
+            Product.objects.get(pk=product_id)
         except User.DoesNotExist:
             errMsg = f"指定のuser_id:{user_id}は存在しません。"
             logger.error(errMsg)
@@ -115,7 +84,6 @@ class CartItemListCreateView(APIView):
         )
 
     def delete(self, request):
-
         user_id = request.data.get("user_id")
         product_id = request.data.get("product_id")
 
@@ -128,9 +96,9 @@ class CartItemListCreateView(APIView):
             )
 
         try:
-            user = User.objects.get(pk=user_id)
-            product = Product.objects.get(pk=product_id)
-            cartItem = CartItem.objects.get(
+            User.objects.get(pk=user_id)
+            Product.objects.get(pk=product_id)
+            CartItem.objects.get(
                 user_id=user_id,
                 product_id=product_id,
             )

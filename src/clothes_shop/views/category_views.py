@@ -5,8 +5,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from clothes_shop.models import Brand, ClothesType, Size, Target
-from clothes_shop.serializers import (
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.serializers.attributes_serializers import (
     BrandSerializer,
     ClothesTypeSerializer,
     SizeSerializer,

@@ -7,8 +7,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from clothes_shop.models import Product
-from clothes_shop.serializers import ProductSerializer
+from clothes_shop.models.product import Product
+from clothes_shop.serializers.product_serializers import ProductSerializer
 from clothes_shop.services.stripe_service import StripeService
 
 logger = logging.getLogger(__name__)

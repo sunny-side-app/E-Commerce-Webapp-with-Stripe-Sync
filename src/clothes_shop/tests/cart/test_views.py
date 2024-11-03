@@ -1,5 +1,5 @@
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.urls import reverse
 from django.utils import timezone
@@ -16,7 +16,7 @@ from clothes_shop.models import (
     Target,
     User,
 )
-from clothes_shop.serializers import CartItemSerializer
+from clothes_shop.serializers.cart_serializers import CartItemSerializer
 
 
 class CartItemTests(APITestCase):
@@ -38,6 +38,7 @@ class CartItemTests(APITestCase):
             release_date=timezone.make_aware(datetime.strptime("2018-12-05", "%Y-%m-%d")),
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_cart",
         )
         self.product_new = Product.objects.create(
             size=self.size,
@@ -51,6 +52,7 @@ class CartItemTests(APITestCase):
             release_date=timezone.make_aware(datetime.strptime("2018-12-05", "%Y-%m-%d")),
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_new",
         )
         self.user = User.objects.create(
             name=fake.name(),
@@ -68,7 +70,6 @@ class CartItemTests(APITestCase):
     def test_get_cartItems_by_User(self):
         response = self.client.get(self.list_url, {"user": self.user.id})
         cartItems = CartItem.objects.filter(user_id=self.user.id)
-
         serializer = CartItemSerializer(cartItems, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
