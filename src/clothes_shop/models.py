@@ -94,6 +94,11 @@ class CartItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "product"], name="unique_user_product")
+        ]
+
 
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
