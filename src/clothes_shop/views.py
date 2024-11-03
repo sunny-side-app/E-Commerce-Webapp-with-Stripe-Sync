@@ -225,6 +225,7 @@ class WishListDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 class CartItemListCreateView(APIView):
     def get(self, request):
+        # TODO　ログインユーザーで取得するようにする
         userId = request.query_params.get("user")
 
         filters = {}
@@ -233,10 +234,7 @@ class CartItemListCreateView(APIView):
         else:
             errMsg = "userIdを設定してください。"
             logger.error(errMsg)
-            return Response(
-                {"message": errMsg},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise NotFound(detail=errMsg)
 
         cartItems = CartItem.objects.filter(**filters).order_by("-created_at")
 

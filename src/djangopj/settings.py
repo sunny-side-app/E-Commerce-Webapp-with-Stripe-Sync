@@ -68,91 +68,91 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "djangopj.wsgi.application"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "[{asctime}] {levelname} [{name}:{lineno}] {message}",
-            "style": "{",
-        },
-    },
-    "filters": {
-        "debug_only": {
-            "()": "clothes_shop.logging_filters.DebugOnlyFilter",
-        },
-        "info_only": {
-            "()": "clothes_shop.logging_filters.InfoOnlyFilter",
-        },
-        "warning_only": {
-            "()": "clothes_shop.logging_filters.WarningOnlyFilter",
-        },
-        "error_only": {
-            "()": "clothes_shop.logging_filters.ErrorOnlyFilter",
-        },
-        "critical_only": {
-            "()": "clothes_shop.logging_filters.CriticalOnlyFilter",
-        },
-    },
-    "handlers": {
-        "debug_file": {
-            "level": "DEBUG",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/debug/debug.log",
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["debug_only"],
-        },
-        "info_file": {
-            "level": "INFO",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/info/info.log",
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["info_only"],
-        },
-        "warning_file": {
-            "level": "WARNING",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/warning/warning.log",
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["warning_only"],
-        },
-        "error_file": {
-            "level": "ERROR",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/error/error.log",
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["error_only"],
-        },
-        "critical_file": {
-            "level": "CRITICAL",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/critical/critical.log",
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["critical_only"],
-        },
-    },
-    "loggers": {
-        "": {
-            "handlers": ["debug_file", "info_file", "warning_file", "error_file", "critical_file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format": "[{asctime}] {levelname} [{name}:{lineno}] {message}",
+#             "style": "{",
+#         },
+#     },
+#     "filters": {
+#         "debug_only": {
+#             "()": "clothes_shop.logging_filters.DebugOnlyFilter",
+#         },
+#         "info_only": {
+#             "()": "clothes_shop.logging_filters.InfoOnlyFilter",
+#         },
+#         "warning_only": {
+#             "()": "clothes_shop.logging_filters.WarningOnlyFilter",
+#         },
+#         "error_only": {
+#             "()": "clothes_shop.logging_filters.ErrorOnlyFilter",
+#         },
+#         "critical_only": {
+#             "()": "clothes_shop.logging_filters.CriticalOnlyFilter",
+#         },
+#     },
+#     "handlers": {
+#         "debug_file": {
+#             "level": "DEBUG",
+#             "class": "logging.handlers.TimedRotatingFileHandler",
+#             "filename": "/django/logs/debug/debug.log",
+#             "when": "D",
+#             "interval": 1,
+#             "backupCount": 30,
+#             "formatter": "verbose",
+#             "filters": ["debug_only"],
+#         },
+#         "info_file": {
+#             "level": "INFO",
+#             "class": "logging.handlers.TimedRotatingFileHandler",
+#             "filename": "/django/logs/info/info.log",
+#             "when": "D",
+#             "interval": 1,
+#             "backupCount": 30,
+#             "formatter": "verbose",
+#             "filters": ["info_only"],
+#         },
+#         "warning_file": {
+#             "level": "WARNING",
+#             "class": "logging.handlers.TimedRotatingFileHandler",
+#             "filename": "/django/logs/warning/warning.log",
+#             "when": "D",
+#             "interval": 1,
+#             "backupCount": 30,
+#             "formatter": "verbose",
+#             "filters": ["warning_only"],
+#         },
+#         "error_file": {
+#             "level": "ERROR",
+#             "class": "logging.handlers.TimedRotatingFileHandler",
+#             "filename": "/django/logs/error/error.log",
+#             "when": "D",
+#             "interval": 1,
+#             "backupCount": 30,
+#             "formatter": "verbose",
+#             "filters": ["error_only"],
+#         },
+#         "critical_file": {
+#             "level": "CRITICAL",
+#             "class": "logging.handlers.TimedRotatingFileHandler",
+#             "filename": "/django/logs/critical/critical.log",
+#             "when": "D",
+#             "interval": 1,
+#             "backupCount": 30,
+#             "formatter": "verbose",
+#             "filters": ["critical_only"],
+#         },
+#     },
+#     "loggers": {
+#         "": {
+#             "handlers": ["debug_file", "info_file", "warning_file", "error_file", "critical_file"],
+#             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+#         },
+#     },
+# }
 
 
 # Database

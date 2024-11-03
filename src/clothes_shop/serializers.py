@@ -174,7 +174,6 @@ class WishListSerializer(serializers.ModelSerializer):
 
 # CartItem Serializer
 class CartItemSerializer(serializers.ModelSerializer):
-
     user = serializers.ReadOnlyField(source="user.id")
     user_pk = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
     product = serializers.SerializerMethodField(read_only=True)
