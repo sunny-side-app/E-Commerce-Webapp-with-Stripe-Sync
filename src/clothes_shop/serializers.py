@@ -62,6 +62,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = (
             "id",
+            "stripe_product_id",
             "name",
             "description",
             "price",
@@ -82,6 +83,7 @@ class ProductSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
+            "stripe_product_id",
             "created_at",
             "updated_at",
         )
@@ -203,3 +205,13 @@ class ShippingSerializer(serializers.ModelSerializer):
             "shipping_address",
             "address_code",
         )
+
+
+class CheckoutSerializer(serializers.Serializer):
+    product_id = serializers.CharField(max_length=255)
+    amount = serializers.IntegerField()
+
+
+class CheckoutListSerializer(serializers.ListSerializer):
+    child = CheckoutSerializer()
+    allow_empty = False
