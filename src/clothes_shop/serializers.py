@@ -1,21 +1,13 @@
 from rest_framework import serializers
 
-from .models import (
-    Brand,
-    CartItem,
-    ClothesType,
-    Favorite,
-    Order,
-    OrderItem,
-    Payment,
-    Product,
-    Review,
-    Shipping,
-    Size,
-    Target,
-    User,
-    WishList,
-)
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.cart import CartItem
+from clothes_shop.models.order import Order, OrderItem
+from clothes_shop.models.payment import Payment
+from clothes_shop.models.product import Product
+from clothes_shop.models.shipping import Shipping
+from clothes_shop.models.user import User
+from clothes_shop.models.user_interaction import Favorite, Review, WishList
 
 
 class SizeSerializer(serializers.ModelSerializer):
@@ -121,7 +113,6 @@ class ProductSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-# Order Serializer (for detail view)
 class OrderSerializer(serializers.ModelSerializer):
     order_items = serializers.StringRelatedField(many=True)
 
@@ -130,7 +121,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ("id", "user", "order_date", "order_status", "total_price", "order_items")
 
 
-# Order List Serializer (for listing orders)
 class OrderListSerializer(serializers.ListSerializer):
     child = OrderSerializer()
 
@@ -152,28 +142,24 @@ class ReviewSerializer(serializers.ModelSerializer):
         )
 
 
-# User Serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "name", "email_address", "role", "address")
 
 
-# Favorite Serializer
 class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ("user", "product")
 
 
-# WishList Serializer
 class WishListSerializer(serializers.ModelSerializer):
     class Meta:
         model = WishList
         fields = ("user", "product", "is_public")
 
 
-# CartItem Serializer
 class CartItemSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source="user.id")
     user_pk = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
@@ -215,21 +201,18 @@ class CartItemSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-# OrderItem Serializer
 class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ("order", "product", "quantity", "unit_price")
 
 
-# Payment Serializer
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
         fields = ("order", "payment_date", "payment_option", "payment_status")
 
 
-# Shipping Serializer
 class ShippingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shipping

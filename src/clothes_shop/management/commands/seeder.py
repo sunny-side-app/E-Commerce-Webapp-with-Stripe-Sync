@@ -9,15 +9,10 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from faker import Faker
 
-from clothes_shop.models import (
-    Brand,
-    CartItem,
-    ClothesType,
-    Product,
-    Size,
-    Target,
-    User,
-)
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.cart import CartItem
+from clothes_shop.models.product import Product
+from clothes_shop.models.user import User
 from clothes_shop.services.stripe_service import StripeService
 
 BASE_DIR = Path(__file__).resolve().parents[4]

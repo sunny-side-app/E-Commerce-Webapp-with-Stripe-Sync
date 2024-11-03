@@ -6,7 +6,8 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from clothes_shop.models import Brand, ClothesType, Product, Size, Target
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.product import Product
 from clothes_shop.serializers import ProductSerializer
 
 

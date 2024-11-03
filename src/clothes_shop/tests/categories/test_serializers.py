@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from clothes_shop.models import Brand, ClothesType, Size, Target
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.serializers import (
     BrandSerializer,
     ClothesTypeSerializer,

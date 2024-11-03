@@ -6,7 +6,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from clothes_shop.models import Product, Review, User
+from clothes_shop.models.product import Product
+from clothes_shop.models.user import User
+from clothes_shop.models.user_interaction import Review
 from clothes_shop.serializers import ReviewSerializer
 
 logger = logging.getLogger(__name__)
