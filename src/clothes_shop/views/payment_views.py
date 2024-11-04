@@ -3,8 +3,8 @@ import logging
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 
-from clothes_shop.models import Payment
-from clothes_shop.serializers import PaymentSerializer
+from clothes_shop.models.payment import Payment
+from clothes_shop.serializers.payment_serializers import PaymentSerializer
 
 logger = logging.getLogger(__name__)
 

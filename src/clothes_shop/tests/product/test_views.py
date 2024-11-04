@@ -1,16 +1,40 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from clothes_shop.models import Brand, ClothesType, Product, Size, Target
-from clothes_shop.serializers import ProductSerializer
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.product import Product
+from clothes_shop.serializers.product_serializers import ProductSerializer
+from clothes_shop.services.stripe_service import StripeService
+
+stripe_service = StripeService()
 
 
 class ProductTests(APITestCase):
     def setUp(self):
+        self.create_product_patcher = patch(
+            "clothes_shop.services.stripe_service.StripeService.create_product",
+            return_value="test",
+        )
+        self.update_product_patcher = patch(
+            "clothes_shop.services.stripe_service.StripeService.update_product", return_value=None
+        )
+        self.delete_product_patcher = patch(
+            "clothes_shop.services.stripe_service.StripeService.delete_product", return_value=None
+        )
+
+        self.mock_create_product = self.create_product_patcher.start()
+        self.mock_update_product = self.update_product_patcher.start()
+        self.mock_delete_product = self.delete_product_patcher.start()
+
+        self.addCleanup(self.create_product_patcher.stop)
+        self.addCleanup(self.update_product_patcher.stop)
+        self.addCleanup(self.delete_product_patcher.stop)
+
         self.size = Size.objects.create(name="XL")
         self.target = Target.objects.create(name="メンズ")
         self.cloth_type = ClothesType.objects.create(name="シャツ")
@@ -29,6 +53,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_1",
         )
         self.product_2 = Product.objects.create(
             size=self.size,
@@ -42,6 +67,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_2",
         )
         self.list_url = reverse("clothes_shop:product-list")
         self.detail_url = reverse("clothes_shop:product-detail", kwargs={"pk": self.product_1.id})
@@ -57,7 +83,7 @@ class ProductTests(APITestCase):
         data = {
             "name": "test",
             "description": "hello",
-            "price": 100.02,
+            "price": 1200,
             "stock_quantity": 10,
             "release_date": self.one_week_ago,
             "size_pk": self.size.id,
@@ -72,7 +98,7 @@ class ProductTests(APITestCase):
         self.assertEqual(Product.objects.count(), 3)
         self.assertEqual(product_created.name, "test")
         self.assertEqual(product_created.description, "hello")
-        self.assertEqual(float(product_created.price), 100.02)
+        self.assertEqual(float(product_created.price), 1200)
         self.assertEqual(product_created.stock_quantity, 10)
         self.assertEqual(product_created.release_date, self.one_week_ago)
         self.assertEqual(product_created.size.name, "XL")

@@ -3,8 +3,8 @@ import logging
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 
-from clothes_shop.models import WishList
-from clothes_shop.serializers import WishListSerializer
+from clothes_shop.models.user_interaction import WishList
+from clothes_shop.serializers.user_interaction_serializers import WishListSerializer
 
 logger = logging.getLogger(__name__)
 

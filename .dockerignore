@@ -3,3 +3,5 @@ README.md
 .git
 .gitignore
 venv/
+.env
+mysql-variables.env

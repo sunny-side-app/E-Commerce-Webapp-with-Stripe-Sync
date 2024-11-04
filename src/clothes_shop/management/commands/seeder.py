@@ -1,27 +1,35 @@
+import logging
+import os
 import random
 from datetime import datetime
+from pathlib import Path
 
+import environ
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from faker import Faker
 
-from clothes_shop.models import (
-    Brand,
-    CartItem,
-    ClothesType,
-    Product,
-    Size,
-    Target,
-    User,
-)
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.cart import CartItem
+from clothes_shop.models.product import Product
+from clothes_shop.models.user import User
+from clothes_shop.services.stripe_service import StripeService
+
+BASE_DIR = Path(__file__).resolve().parents[4]
+env = environ.Env()
+env.read_env(os.path.join(os.path.dirname(BASE_DIR), ".env"))
+demo_product_count = int(env("DEMO_PRODUCT_COUNT"))
+demo_user_count = int(env("DEMO_USER_COUNT"))
+
+fake = Faker("ja_JP")
+logger = logging.getLogger(__name__)
+stripe_service = StripeService()
 
 
 class Command(BaseCommand):
     help = "Seeds the database with product data using only Faker"
 
     def handle(self, *args, **kwargs):
-        fake = Faker("ja_JP")
-
         size_name_list = ["S", "M", "L", "XL", "XXL"]
         target_name_list = ["メンズ", "レディース", "キッズ"]
         cloth_type_name_list = ["シャツ", "ズボン", "ジャケット", "アウター"]
@@ -45,26 +53,26 @@ class Command(BaseCommand):
         clothes_type_list = ClothesType.objects.all()
         brand_list = Brand.objects.all()
 
-        product_data_count = 1000
-        for _ in range(product_data_count):
+        for _ in range(demo_product_count):
+            name = fake.text(max_nb_chars=40)
+            price = random.randint(1, 10000)
+            stripe_product_id = stripe_service.create_product(name, price)
             Product.objects.get_or_create(
                 size=random.choice(size_list),
                 target=random.choice(target_list),
                 clothes_type=random.choice(clothes_type_list),
                 brand=random.choice(brand_list),
-                name=fake.text(max_nb_chars=40),
+                name=name,
                 description=fake.sentence(),
                 category=random.choice(category_list),
-                price=random.randint(1, 10000),
+                price=price,
                 release_date=timezone.make_aware(datetime.strptime("2018-12-05", "%Y-%m-%d")),
                 stock_quantity=random.randint(0, 100),
+                stripe_product_id=stripe_product_id,
             )
-        user_data_count = 100
-        for i in range(user_data_count):
-            role_val = "registered"
-            if i == 1 or i == 2:
-                role_val = "admin"
 
+        for i in range(demo_user_count):
+            role_val = "admin" if i in (1, 2) else "registered"
             user, created = User.objects.get_or_create(
                 name=fake.name(),
                 defaults={  # 重複がない場合のみこれを使って新規作成
@@ -88,5 +96,4 @@ class Command(BaseCommand):
                 CartItem.objects.get_or_create(
                     user=user, product=random.choice(product_list), quantity=random.randint(1, 5)
                 )
-
         print("Successfully seeded the database using Faker")

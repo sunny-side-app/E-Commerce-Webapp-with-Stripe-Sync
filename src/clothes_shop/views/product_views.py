@@ -7,10 +7,26 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from clothes_shop.models import Product
-from clothes_shop.serializers import ProductSerializer
+from clothes_shop.models.product import Product
+from clothes_shop.serializers.product_serializers import ProductSerializer
+from clothes_shop.services.stripe_service import StripeService
 
 logger = logging.getLogger(__name__)
+stripe_service = StripeService()
+
+
+def get_product(product_id):
+    try:
+        product = Product.objects.get(pk=product_id)
+        return product
+    except Product.DoesNotExist:
+        errMsg = f"指定されたID {product_id} に紐づく製品が存在しません。"
+        logger.error(errMsg)
+        raise NotFound(detail=errMsg)
+    except Exception as e:
+        errMsg = f"想定外のエラーが発生しました: {str(e)}"
+        logger.error(errMsg)
+        raise APIException(detail=errMsg)
 
 
 class ProductListView(APIView):
@@ -72,39 +88,48 @@ class ProductListView(APIView):
         if serializer.is_valid() is False:
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
+        stripe_product_id = stripe_service.create_product(
+            request.data["name"], request.data["price"]
+        )
+        try:
+            serializer.save(stripe_product_id=stripe_product_id)
+        except Exception as e:
+            logger.error(e)
+            stripe_service.delete_product(stripe_product_id)
+            raise e
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request):
+        product_ids = request.data["product_ids"]
+        Product.objects.filter(id__in=product_ids).update(is_deleted=True)
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            stripe_service.delete_product(product.stripe_product_id)
+        return Response(status=status.HTTP_200_OK)
 
 
 class ProductDetailView(APIView):
-    def get_product(self, pk):
-        try:
-            product = Product.objects.get(pk=pk)
-            return product
-        except Product.DoesNotExist:
-            errMsg = f"指定されたID {pk} に紐づく製品が存在しません。"
-            logger.error(errMsg)
-            raise NotFound(detail=errMsg)
-        except Exception as e:
-            errMsg = f"想定外のエラーが発生しました: {str(e)}"
-            logger.error(errMsg)
-            raise APIException(detail=errMsg)
-
     def get(self, request, *args, **kwargs):
-        product = self.get_product(kwargs.get("pk"))
+        product = get_product(kwargs.get("pk"))
         serializer = ProductSerializer(product)
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
-        product = self.get_product(kwargs.get("pk"))
+        product = get_product(kwargs.get("pk"))
         serializer = ProductSerializer(product, data=request.data, partial=True)
         if not serializer.is_valid():
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        stripe_service.update_product(
+            product.stripe_product_id,
+            serializer.validated_data["name"],
+            serializer.validated_data["price"],
+        )
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
-        product = self.get_product(kwargs.get("pk"))
+        product = get_product(kwargs.get("pk"))
+        stripe_service.delete_product(product.stripe_product_id)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

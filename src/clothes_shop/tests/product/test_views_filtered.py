@@ -6,8 +6,9 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from clothes_shop.models import Brand, ClothesType, Product, Size, Target
-from clothes_shop.serializers import ProductSerializer
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.product import Product
+from clothes_shop.serializers.product_serializers import ProductSerializer
 
 
 class ProductTests(APITestCase):
@@ -34,6 +35,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=True,
+            stripe_product_id="product_0",
         )
         self.product_1 = Product.objects.create(
             size=self.size_m,
@@ -47,6 +49,7 @@ class ProductTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_1",
         )
         self.product_2 = Product.objects.create(
             size=self.size_xl,
@@ -60,6 +63,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_2",
         )
         self.product_3 = Product.objects.create(
             size=self.size_m,
@@ -73,6 +77,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_3",
         )
         self.product_4 = Product.objects.create(
             size=self.size_m,
@@ -86,6 +91,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_4",
         )
         self.product_5 = Product.objects.create(
             size=self.size_m,
@@ -99,6 +105,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_5",
         )
         self.product_6 = Product.objects.create(
             size=self.size_m,
@@ -112,6 +119,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_6",
         )
         self.product_7 = Product.objects.create(
             size=self.size_m,
@@ -125,6 +133,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_7",
         )
         self.product_8 = Product.objects.create(
             size=self.size_m,
@@ -138,6 +147,7 @@ class ProductTests(APITestCase):
             release_date=one_week_ago,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_8",
         )
         self.list_url = reverse("clothes_shop:product-list")
 
@@ -167,7 +177,7 @@ class ProductTests(APITestCase):
     def test_get_filtered_list_invalid_date(self):
         response = self.client.get(self.list_url, {"release_date": "invalid_date"})
         product = Product.objects.filter(is_deleted=False, release_date__lt=self.one_week_after)
-        serializer = ProductSerializer(product, many=True)
+        ProductSerializer(product, many=True)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_filtered_list_by_size(self):

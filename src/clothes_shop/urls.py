@@ -3,6 +3,7 @@ from django.urls import path
 from clothes_shop.views import (
     cart_views,
     category_views,
+    checkout_views,
     favorite_views,
     order_views,
     payment_views,
@@ -135,4 +136,6 @@ urlpatterns = [
     path("api/brands/<int:pk>/", category_views.BrandDetailView.as_view(), name="brand-detail"),
     # ALL Categories
     path("api/categories/", category_views.CategoryListView.as_view(), name="category-list"),
+    # Stripe Checkout
+    path("api/checkout/", checkout_views.StripeCheckoutView.as_view(), name="stripe-checkout"),
 ]

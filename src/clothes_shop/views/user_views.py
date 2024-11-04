@@ -4,8 +4,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
-from clothes_shop.models import User
-from clothes_shop.serializers import UserSerializer
+from clothes_shop.models.user import User
+from clothes_shop.serializers.user_serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
 

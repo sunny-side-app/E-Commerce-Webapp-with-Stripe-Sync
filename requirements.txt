@@ -5,3 +5,4 @@ django-cors-headers
 django-environ
 faker
 djangorestframework-simplejwt==5.3.1 # JWT token implementation for DRF
+stripe>=11.0.0

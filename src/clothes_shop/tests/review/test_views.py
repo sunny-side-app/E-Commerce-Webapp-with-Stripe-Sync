@@ -6,8 +6,11 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from clothes_shop.models import Brand, ClothesType, Product, Review, Size, Target, User
-from clothes_shop.serializers import ReviewSerializer
+from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
+from clothes_shop.models.product import Product
+from clothes_shop.models.user import User
+from clothes_shop.models.user_interaction import Review
+from clothes_shop.serializers.user_interaction_serializers import ReviewSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,7 @@ class ReviewTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_1",
         )
         self.product_2 = Product.objects.create(
             size=self.size,
@@ -45,6 +49,7 @@ class ReviewTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_2",
         )
         self.user_1 = User.objects.create(
             name="たろう",
@@ -209,6 +214,7 @@ class ReviewTests(APITestCase):
             release_date=self.one_week_after,
             stock_quantity=500,
             is_deleted=False,
+            stripe_product_id="product_3",
         )
         detail_url = reverse(
             "clothes_shop:user-product-review-detail",
