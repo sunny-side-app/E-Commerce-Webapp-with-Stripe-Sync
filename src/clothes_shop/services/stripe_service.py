@@ -6,8 +6,6 @@ from typing import Any
 
 import environ
 import stripe
-from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
-from django.shortcuts import redirect
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
@@ -72,9 +70,7 @@ class StripeService:
         stripe.Product.modify(id, active=False)
         return None
 
-    def checkout(
-        self, checkout_data_list: list[CheckoutData]
-    ) -> HttpResponseRedirect | HttpResponsePermanentRedirect:
+    def checkout(self, checkout_data_list: list[CheckoutData]) -> str:
         line_items: list[Any] = []
         for checkout_data in checkout_data_list:
             price_id: str = self.__get_price(checkout_data.stripe_product_id)
@@ -85,4 +81,4 @@ class StripeService:
             success_url=self.checkout_url_success,
             cancel_url=self.checkout_url_cancel,
         )
-        return redirect(session.url, code=303)
+        return session.url

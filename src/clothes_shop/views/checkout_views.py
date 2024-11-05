@@ -33,4 +33,6 @@ class StripeCheckoutView(APIView):
             product = get_product(product_id)
             stripe_product_id = product.stripe_product_id
             checkout_data_list.append(CheckoutData(stripe_product_id, amount))
-        return striep_service.checkout(checkout_data_list)
+        redirect_url = striep_service.checkout(checkout_data_list)
+        data = {"url": redirect_url}
+        return Response(data, status=status.HTTP_200_OK)
