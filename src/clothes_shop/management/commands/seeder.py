@@ -73,14 +73,18 @@ class Command(BaseCommand):
 
         for i in range(demo_user_count):
             role_val = "admin" if i in (1, 2) else "registered"
+
             user, created = User.objects.get_or_create(
                 name=fake.name(),
                 defaults={  # 重複がない場合のみこれを使って新規作成
-                    'email': fake.email(),
-                    'role': role_val,
-                    'email_validated_at': timezone.now(),
-                    'address': fake.address(),
-                }
+                    "email": fake.email(),
+                    "role": role_val,
+                    "email_validated_at": timezone.now(),
+                    "date_joined": timezone.now(),
+                    "address": fake.address(),
+                    "is_active": True,
+                    "is_staff": True if role_val == "admin" else False,
+                },
             )
 
             if created:
