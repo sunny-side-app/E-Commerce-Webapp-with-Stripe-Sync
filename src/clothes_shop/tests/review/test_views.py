@@ -53,14 +53,14 @@ class ReviewTests(APITestCase):
         )
         self.user_1 = User.objects.create(
             name="たろう",
-            email_address="test@hoge.commm",
+            email="test@hoge.commm",
             role="1",
             email_validated_at=self.one_week_ago,
             address="Japan",
         )
         self.user_2 = User.objects.create(
             name="じろう",
-            email_address="test@huga.commm",
+            email="test@huga.commm",
             role="1",
             email_validated_at=self.one_week_ago,
             address="USA",

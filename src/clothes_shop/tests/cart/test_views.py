@@ -56,7 +56,7 @@ class CartItemTests(APITestCase):
         )
         self.user = User.objects.create(
             name=fake.name(),
-            email_address=fake.email(),
+            email=fake.email(),
             role="registered",
             email_validated_at=timezone.now(),
             address=fake.address(),
