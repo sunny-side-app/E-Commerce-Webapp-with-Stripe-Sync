@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from clothes_shop.views import (
     cart_views,
@@ -14,16 +15,11 @@ from clothes_shop.views import (
     wishlist_views,
 )
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView, TokenRefreshView
-)
-
 app_name = "clothes_shop"
 
 urlpatterns = [
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path("api/token/", user_views.CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Product API URLs
     path("api/products/", product_views.ProductListView.as_view(), name="product-list"),
     path(

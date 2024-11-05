@@ -1,13 +1,23 @@
 import logging
 
 from rest_framework import generics, status
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 from clothes_shop.models.user import User
-from clothes_shop.serializers.user_serializers import UserSerializer
+from clothes_shop.serializers.user_serializers import (
+    CustomTokenObtainPairSerializer,
+    UserSerializer,
+)
 
 logger = logging.getLogger(__name__)
+
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserListCreateView(generics.ListCreateAPIView):
@@ -23,6 +33,7 @@ class UserListCreateView(generics.ListCreateAPIView):
         except ValidationError as e:
             logger.error(e.detail)
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
