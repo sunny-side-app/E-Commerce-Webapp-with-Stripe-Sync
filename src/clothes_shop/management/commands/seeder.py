@@ -13,6 +13,7 @@ from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.models.cart import CartItem
 from clothes_shop.models.product import Product
 from clothes_shop.models.user import User
+from clothes_shop.models.user_interaction import Favorite
 from clothes_shop.services.stripe_service import StripeService
 
 BASE_DIR = Path(__file__).resolve().parents[4]
@@ -96,8 +97,13 @@ class Command(BaseCommand):
 
         for user in user_list:
             cartItems_num = random.randint(1, 10)
+            fav_num = random.randint(1, 5)
+
             for _ in range(cartItems_num):
                 CartItem.objects.get_or_create(
                     user=user, product=random.choice(product_list), quantity=random.randint(1, 5)
                 )
+
+            for _ in range(fav_num):
+                Favorite.objects.get_or_create(user=user, product=random.choice(product_list))
         print("Successfully seeded the database using Faker")
