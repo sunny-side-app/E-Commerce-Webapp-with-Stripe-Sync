@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from clothes_shop.models.product import Product
+from clothes_shop.models.user_interaction import Favorite
 from clothes_shop.serializers.product_serializers import ProductSerializer
 from clothes_shop.services.stripe_service import StripeService
 
@@ -80,8 +81,22 @@ class ProductListView(APIView):
         paginator.page_size = 10
         paginated_products = paginator.paginate_queryset(products, request)
 
-        serializer = ProductSerializer(paginated_products, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        serializer_data = ProductSerializer(paginated_products, many=True).data
+        logger.error(request.user.is_authenticated)
+        # 認証ユーザーの場合は、各商品に対して`fav`をチェック]
+        if request.user.is_authenticated:
+            # ユーザーのお気に入り情報を取得
+            user_favorite_product_ids = set(
+                Favorite.objects.filter(user=request.user.id).values_list("product_id", flat=True)
+            )
+            logger.error(user_favorite_product_ids)
+            for product in serializer_data:
+                product["fav"] = product["id"] in user_favorite_product_ids
+        else:
+            # ゲストユーザーの場合はすべて`fav`を`False`に設定
+            for product in serializer_data:
+                product["fav"] = False
+        return paginator.get_paginated_response(serializer_data)
 
     def post(self, request):
         serializer = ProductSerializer(data=request.data)

@@ -4,18 +4,12 @@ from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from clothes_shop.models.user import User
-from clothes_shop.models.user_interaction import Favorite
-from clothes_shop.serializers.user_interaction_serializers import FavoriteSerializer
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        favorite = Favorite.objects.filter(user=self.user)
-        favorite_data = FavoriteSerializer(favorite, many=True).data
-        fav_ids = []
-        for fav in favorite_data:
-            fav_ids.append(fav["product"])
+
         data.update(
             {
                 "user": {
@@ -23,8 +17,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                     "name": self.user.name,
                     "email": self.user.email,
                     "role": self.user.role,
-                },
-                "fav": fav_ids,
+                }
             }
         )
 
