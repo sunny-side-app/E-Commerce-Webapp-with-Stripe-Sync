@@ -16,8 +16,12 @@ logger = logging.getLogger(__name__)
 
 class FavoriteListCreateView(APIView):
     def post(self, request):
-        # TODO　認証機能完成後認証による制御をかける
-        user_id = request.data.get("user_id")
+        if not request.user.is_authenticated:
+            return Response(
+                {"error": "ログインしていません。"}, status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        user_id = request.user.id
         product_id = request.data.get("product_id")
         fav = request.data.get("fav")
 
