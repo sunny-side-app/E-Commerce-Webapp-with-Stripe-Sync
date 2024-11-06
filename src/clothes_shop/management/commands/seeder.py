@@ -76,11 +76,11 @@ class Command(BaseCommand):
             user, created = User.objects.get_or_create(
                 name=fake.name(),
                 defaults={  # 重複がない場合のみこれを使って新規作成
-                    'email': fake.email(),
-                    'role': role_val,
-                    'email_validated_at': timezone.now(),
-                    'address': fake.address(),
-                }
+                    "email": fake.email(),
+                    "role": role_val,
+                    "email_validated_at": timezone.now(),
+                    "address": fake.address(),
+                },
             )
 
             if created:
