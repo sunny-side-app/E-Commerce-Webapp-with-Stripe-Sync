@@ -20,6 +20,12 @@ class CheckoutData:
         self.product_amount = product_amount
 
 
+class CustomerData:
+    def __init__(self, name: str, email: str) -> None:
+        self.name = name
+        self.email = email
+
+
 class StripeService:
     def __init__(self):
         stripe.api_key = env("STRIPE_SECRET_KEY")
@@ -82,3 +88,22 @@ class StripeService:
             cancel_url=self.checkout_url_cancel,
         )
         return session.url
+
+    def create_customer(self, customerData: CustomerData) -> str:
+        customer: stripe.Customer = stripe.Customer.create(
+            name=customerData.name,
+            email=customerData.email,
+        )
+        return customer.id
+
+    def update_customer(self, stripe_customer_id: str, customerData: CustomerData) -> None:
+        stripe.Customer.modify(
+            stripe_customer_id,
+            name=customerData.name,
+            email=customerData.email,
+        )
+        return None
+
+    def delete_customer(self, stripe_customer_id: str) -> None:
+        stripe.Customer.delete(stripe_customer_id)
+        return None
