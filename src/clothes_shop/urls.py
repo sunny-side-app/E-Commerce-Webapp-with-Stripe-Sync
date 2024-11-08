@@ -18,7 +18,7 @@ from clothes_shop.views import (
 app_name = "clothes_shop"
 
 urlpatterns = [
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/", user_views.CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Product API URLs
     path("api/products/", product_views.ProductListView.as_view(), name="product-list"),
@@ -32,7 +32,7 @@ urlpatterns = [
     path("api/orders/<int:pk>/", order_views.OrderDetailView.as_view(), name="order-detail"),
     # Review API URLs
     path(
-        "api/product-reviews/<int:product_id>/",
+        "api/reviews/",
         review_views.ProductReviewListView.as_view(),
         name="product-review-list",
     ),

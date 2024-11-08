@@ -13,6 +13,7 @@ from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.models.cart import CartItem
 from clothes_shop.models.product import Product
 from clothes_shop.models.user import User
+from clothes_shop.models.user_interaction import Favorite
 from clothes_shop.services.stripe_service import CustomerData, StripeService
 
 BASE_DIR = Path(__file__).resolve().parents[4]
@@ -82,7 +83,10 @@ class Command(BaseCommand):
                     "email": email,
                     "role": role_val,
                     "email_validated_at": timezone.now(),
+                    "date_joined": timezone.now(),
                     "address": fake.address(),
+                    "is_active": True,
+                    "is_staff": True if role_val == "admin" else False,
                 },
             )
             if created:
@@ -94,8 +98,28 @@ class Command(BaseCommand):
 
         for user in user_list:
             cartItems_num = random.randint(1, 10)
+            fav_num = random.randint(1, 5)
+
+            cart_product_set = set()
             for _ in range(cartItems_num):
+                product = random.choice(product_list)
+
+                while (user.id, product.id) in cart_product_set:
+                    product = random.choice(product_list)
+
                 CartItem.objects.get_or_create(
-                    user=user, product=random.choice(product_list), quantity=random.randint(1, 5)
+                    user=user, product=product, defaults={"quantity": random.randint(1, 5)}
                 )
+                cart_product_set.add((user.id, product.id))
+
+            favorite_product_set = set()
+            for _ in range(fav_num):
+                product = random.choice(product_list)
+
+                while (user.id, product.id) in favorite_product_set:
+                    product = random.choice(product_list)
+
+                Favorite.objects.get_or_create(user=user, product=product)
+                favorite_product_set.add((user.id, product.id))
+
         print("Successfully seeded the database using Faker")
