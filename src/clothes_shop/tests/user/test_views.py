@@ -1,12 +1,13 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from clothes_shop.models.user import User
+
 
 class UserAPITests(APITestCase):
-    def test_user_creation(self):
-        url = reverse("clothes_shop:user-list-create")
-        data = {
+    def test_CRUD_user(self):
+        user_list_create_url = reverse("clothes_shop:user-list-create")
+        initial_user_data = {
+            "stripe_customer_id": "hogehoge",
             "email": "test@example.com",
             "password": "password",
             "name": "Test User",

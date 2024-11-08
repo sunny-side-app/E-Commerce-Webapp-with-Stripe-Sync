@@ -13,7 +13,7 @@ from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.models.cart import CartItem
 from clothes_shop.models.product import Product
 from clothes_shop.models.user import User
-from clothes_shop.services.stripe_service import StripeService
+from clothes_shop.services.stripe_service import CustomerData, StripeService
 
 BASE_DIR = Path(__file__).resolve().parents[4]
 env = environ.Env()
@@ -73,16 +73,18 @@ class Command(BaseCommand):
 
         for i in range(demo_user_count):
             role_val = "admin" if i in (1, 2) else "registered"
+            name = fake.name()
+            email = fake.email()
             user, created = User.objects.get_or_create(
-                name=fake.name(),
+                name=name,
                 defaults={  # 重複がない場合のみこれを使って新規作成
-                    'email': fake.email(),
-                    'role': role_val,
-                    'email_validated_at': timezone.now(),
-                    'address': fake.address(),
-                }
+                    "stripe_customer_id": stripe_service.create_customer(CustomerData(name, email)),
+                    "email": email,
+                    "role": role_val,
+                    "email_validated_at": timezone.now(),
+                    "address": fake.address(),
+                },
             )
-
             if created:
                 user.set_password("password")  # 任意のデフォルトパスワードを設定
                 user.save()
