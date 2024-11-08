@@ -1,11 +1,11 @@
 import logging
 
-from rest_framework import generics, status
+from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from clothes_shop.models.user import User
-from clothes_shop.serializers.user_serializers import UserSerializer
+from clothes_shop.serializers.user_serializers import UserSerializer,UserProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -30,3 +30,11 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return get_object_or_404(User, pk=self.kwargs.get("pk"))
+
+class UserProfileView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
