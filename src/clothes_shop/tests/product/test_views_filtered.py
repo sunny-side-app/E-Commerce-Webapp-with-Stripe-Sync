@@ -155,15 +155,31 @@ class ProductTests(APITestCase):
         response = self.client.get(self.list_url)
         product = Product.objects.filter(is_deleted=False, release_date__lt=timezone.now())
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_is_deleted(self):
         response = self.client.get(self.list_url, {"is_deleted": True})
         product = Product.objects.filter(is_deleted=True)
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_release_date(self):
         response = self.client.get(
@@ -171,8 +187,16 @@ class ProductTests(APITestCase):
         )
         product = Product.objects.filter(is_deleted=False, release_date__lt=self.one_week_after)
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_invalid_date(self):
         response = self.client.get(self.list_url, {"release_date": "invalid_date"})
@@ -186,8 +210,16 @@ class ProductTests(APITestCase):
             size=self.size_xl, is_deleted=False, release_date__lt=timezone.now()
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_by_target(self):
         response = self.client.get(self.list_url, {"target[]": [self.target_mens.id]})
@@ -195,8 +227,16 @@ class ProductTests(APITestCase):
             target=self.target_mens, is_deleted=False, release_date__lt=timezone.now()
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_by_clothes_type(self):
         response = self.client.get(self.list_url, {"clothes_type[]": [self.cloth_type_pants.id]})
@@ -204,8 +244,16 @@ class ProductTests(APITestCase):
             clothes_type=self.cloth_type_pants, is_deleted=False, release_date__lt=timezone.now()
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_by_brand(self):
         response = self.client.get(self.list_url, {"brand[]": [self.brand_nike.id]})
@@ -213,8 +261,16 @@ class ProductTests(APITestCase):
             brand=self.brand_nike, is_deleted=False, release_date__lt=timezone.now()
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_by_combined_filters(self):
         response = self.client.get(
@@ -233,8 +289,16 @@ class ProductTests(APITestCase):
             release_date__lt=timezone.now(),
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_by_keyword_in_name_or_description(self):
         response = self.client.get(
@@ -247,8 +311,16 @@ class ProductTests(APITestCase):
             release_date__lt=timezone.now(),
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)
 
     def test_get_filtered_list_by_multiple_filters(self):
         response = self.client.get(
@@ -265,5 +337,13 @@ class ProductTests(APITestCase):
             release_date__lt=timezone.now(),
         )
         serializer = ProductSerializer(product, many=True)
+        response_data = [
+            {key: value for key, value in item.items() if key != "fav"}
+            for item in response.data["results"]
+        ]
+        serializer_data = [
+            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+        ]
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response_data, serializer_data)

@@ -6,6 +6,7 @@ from django.utils import timezone
 from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from clothes_shop.models import (
     Brand,
@@ -60,12 +61,17 @@ class CartItemTests(APITestCase):
             role="registered",
             email_validated_at=timezone.now(),
             address=fake.address(),
+            date_joined=timezone.now(),
+            is_active=True,
+            is_staff=True,
         )
         self.quantity = random.randint(1, 5)
         self.cartItem = CartItem.objects.create(
             user=self.user, product=self.product_cart, quantity=self.quantity
         )
         self.list_url = reverse("clothes_shop:cartitem-list-create")
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
 
     def test_get_cartItems_by_User(self):
         response = self.client.get(self.list_url, {"user": self.user.id})

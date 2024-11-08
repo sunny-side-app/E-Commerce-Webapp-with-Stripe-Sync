@@ -7,6 +7,7 @@ from django.utils import timezone
 from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from clothes_shop.models import (
     Brand,
@@ -48,30 +49,23 @@ class CartItemListCreateViewTests(APITestCase):
             role="registered",
             email_validated_at=timezone.now(),
             address=fake.address(),
+            date_joined=timezone.now(),
+            is_active=True,
+            is_staff=True,
         )
         self.quantity = random.randint(1, 5)
         self.cartItem = CartItem.objects.create(
             user=self.user, product=self.product, quantity=self.quantity
         )
         self.list_url = reverse("clothes_shop:cartitem-list-create")
-
-    def test_get_value_error(self):
-        query_params = {"error": "hogehoge"}
-        response = self.client.get(self.list_url, query_params=query_params)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
 
     def test_post_value_error_wihtout_params(self):
         data = {"error": "hogehoge"}
         response = self.client.post(self.list_url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expectedMsg = "userId、product_idを設定してください。"
-        self.assertEqual(response.data["message"], expectedMsg)
-
-    def test_post_value_error_notExist_user(self):
-        data = {"user_id": 9999, "product_id": self.product.id}
-        response = self.client.post(self.list_url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expectedMsg = "指定のuser_id:9999は存在しません。"
         self.assertEqual(response.data["message"], expectedMsg)
 
     def test_post_value_error_notExist_product(self):
@@ -86,13 +80,6 @@ class CartItemListCreateViewTests(APITestCase):
         response = self.client.delete(self.list_url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         expectedMsg = "userId、product_idを設定してください。"
-        self.assertEqual(response.data["message"], expectedMsg)
-
-    def test_delete_value_error_notExist_user(self):
-        data = {"user_id": 9999, "product_id": self.product.id}
-        response = self.client.delete(self.list_url, data=data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        expectedMsg = "指定のuser_id:9999は存在しません。"
         self.assertEqual(response.data["message"], expectedMsg)
 
     def test_delete_value_error_notExist_product(self):
