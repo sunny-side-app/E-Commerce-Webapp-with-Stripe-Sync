@@ -29,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "id",
+            "stripe_customer_id",
             "email",
             "name",
             "password",
@@ -45,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User(
+            stripe_customer_id=validated_data["stripe_customer_id"],
             email=validated_data["email"],
             name=validated_data["name"],
             role=validated_data["role"],

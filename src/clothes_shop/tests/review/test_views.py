@@ -52,6 +52,7 @@ class ReviewTests(APITestCase):
             stripe_product_id="product_2",
         )
         self.user_1 = User.objects.create(
+            stripe_customer_id="user_1",
             name="たろう",
             email="test@hoge.commm",
             role="1",
@@ -59,6 +60,7 @@ class ReviewTests(APITestCase):
             address="Japan",
         )
         self.user_2 = User.objects.create(
+            stripe_customer_id="user_2",
             name="じろう",
             email="test@huga.commm",
             role="1",

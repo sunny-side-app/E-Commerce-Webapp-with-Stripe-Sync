@@ -6,8 +6,6 @@ from typing import Any
 
 import environ
 import stripe
-from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
-from django.shortcuts import redirect
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
@@ -20,6 +18,12 @@ class CheckoutData:
     def __init__(self, stripe_product_id: str, product_amount: int) -> None:
         self.stripe_product_id = stripe_product_id
         self.product_amount = product_amount
+
+
+class CustomerData:
+    def __init__(self, name: str, email: str) -> None:
+        self.name = name
+        self.email = email
 
 
 class StripeService:
@@ -72,9 +76,7 @@ class StripeService:
         stripe.Product.modify(id, active=False)
         return None
 
-    def checkout(
-        self, checkout_data_list: list[CheckoutData]
-    ) -> HttpResponseRedirect | HttpResponsePermanentRedirect:
+    def checkout(self, checkout_data_list: list[CheckoutData]) -> str:
         line_items: list[Any] = []
         for checkout_data in checkout_data_list:
             price_id: str = self.__get_price(checkout_data.stripe_product_id)
@@ -85,4 +87,23 @@ class StripeService:
             success_url=self.checkout_url_success,
             cancel_url=self.checkout_url_cancel,
         )
-        return redirect(session.url, code=303)
+        return session.url
+
+    def create_customer(self, customerData: CustomerData) -> str:
+        customer: stripe.Customer = stripe.Customer.create(
+            name=customerData.name,
+            email=customerData.email,
+        )
+        return customer.id
+
+    def update_customer(self, stripe_customer_id: str, customerData: CustomerData) -> None:
+        stripe.Customer.modify(
+            stripe_customer_id,
+            name=customerData.name,
+            email=customerData.email,
+        )
+        return None
+
+    def delete_customer(self, stripe_customer_id: str) -> None:
+        stripe.Customer.delete(stripe_customer_id)
+        return None
