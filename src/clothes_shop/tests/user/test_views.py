@@ -39,27 +39,35 @@ class UserAPITests(APITestCase):
 
 class UserProfileViewTests(APITestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            name="Test User",
+            password="testpass",
+            role="registered"
+        )
         self.client.force_authenticate(user=self.user)
 
     def test_retrieve_user_profile(self):
-        url = reverse('user-profile')
+        url = reverse('clothes_shop:user-profile')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['username'], self.user.username)
+        self.assertEqual(response.data['name'], self.user.name)
         self.assertEqual(response.data['email'], self.user.email)
+        self.assertEqual(response.data['role'], self.user.role)
+        self.assertEqual(response.data['address'], self.user.address)
+        self.assertEqual(response.data['is_active'], self.user.is_active)
 
     def test_update_user_profile(self):
-        url = reverse('user-profile')
-        data = {'first_name': 'Updated', 'last_name': 'User'}
+        url = reverse('clothes_shop:user-profile') 
+        data = {'name': 'Updated User', 'address': '123 Updated Street'}
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, 'Updated')
-        self.assertEqual(self.user.last_name, 'User')
+        self.assertEqual(self.user.name, 'Updated User')
+        self.assertEqual(self.user.address, '123 Updated Street')
 
     def test_delete_user_profile(self):
-        url = reverse('user-profile')
+        url = reverse('clothes_shop:user-profile') 
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(User.objects.filter(username="testuser").exists())
+        self.assertFalse(User.objects.filter(email="testuser@example.com").exists())
