@@ -32,7 +32,7 @@ urlpatterns = [
     path("api/orders/<int:pk>/", order_views.OrderDetailView.as_view(), name="order-detail"),
     # Review API URLs
     path(
-        "api/product-reviews/<int:product_id>/",
+        "api/reviews/",
         review_views.ProductReviewListView.as_view(),
         name="product-review-list",
     ),

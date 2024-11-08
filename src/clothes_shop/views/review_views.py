@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 
 class ProductReviewListView(APIView):
     def get(self, request, *args, **kwargs):
-        product_id = self.kwargs["product_id"]
+        product_id = request.query_params.get("product_Id")
+        if not product_id:
+            return Response({"error": "product_Id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
         reviews = Review.objects.filter(product_id=product_id)
         paginator = PageNumberPagination()
         paginator.page_size = 10
