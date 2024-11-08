@@ -48,7 +48,7 @@ urlpatterns = [
     ),
     # User API URLs
     path("api/users/", user_views.UserListCreateView.as_view(), name="user-list-create"),
-    path("api/users/<int:pk>/", user_views.UserDetailView.as_view(), name="user-detail"),
+    path("api/users/<int:user_id>/", user_views.UserDetailView.as_view(), name="user-detail"),
     path('api/profile/', user_views.UserProfileView.as_view(), name='user-profile'),
     # Favorite API URLs
     path(

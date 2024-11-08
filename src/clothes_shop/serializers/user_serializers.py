@@ -58,3 +58,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'is_staff', 
             'address',
             ]
+        read_only_fields = ['id', 'is_active', 'is_staff']

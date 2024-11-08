@@ -48,10 +48,29 @@ class UserDetailView(APIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def get_object(self):
-        return get_object_or_404(User, pk=self.kwargs.get("pk"))
+    def get(self, request, *args, **kwargs):
+        user = get_user(kwargs.get("user_id"))
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
-class UserProfileView(generics.RetrieveAPIView):
+    def put(self, request, *args, **kwargs):
+        user = get_user(kwargs.get("user_id"))
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if not serializer.is_valid():
+            logger.error(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        customerData = CustomerData(name=request.data["name"], email=request.data["email"])
+        stripe_service.update_customer(user.stripe_customer_id, customerData)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        user = get_user(kwargs.get("user_id"))
+        stripe_service.delete_customer(user.stripe_customer_id)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
