@@ -37,7 +37,7 @@ class OrderDetailView(APIView):
 
     def get_permissions(self):
         if self.request.method in ["PUT", "DELETE"]:
-            return [IsAdminUser()]
+            return [permissions.IsAdminUser()]
         return super().get_permissions()
 
     def get(self, request, pk):
