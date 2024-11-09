@@ -3,17 +3,21 @@ from datetime import datetime, timedelta
 
 from django.urls import reverse
 from django.utils import timezone
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.models.product import Product
+from clothes_shop.models.user import User
 
 logger = logging.getLogger(__name__)
 
 
 class ProductListViewTests(APITestCase):
     def setUp(self):
+        fake = Faker("ja_JP")
         self.size_xl = Size.objects.create(name="XL")
         self.target_men = Target.objects.create(name="メンズ")
         self.cloth_type_shirt = ClothesType.objects.create(name="シャツ")
@@ -33,7 +37,19 @@ class ProductListViewTests(APITestCase):
             stock_quantity=500,
             is_deleted=False,
         )
+        self.user = User.objects.create(
+            name=fake.name(),
+            email=fake.email(),
+            role="registered",
+            email_validated_at=timezone.now(),
+            address=fake.address(),
+            date_joined=timezone.now(),
+            is_active=True,
+            is_staff=True,
+        )
         self.list_url = reverse("clothes_shop:product-list")
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
 
     def test_get_value_error(self):
         query_params = {"release_date": "hogehoge"}
