@@ -35,6 +35,11 @@ class OrderListCreateView(APIView):
 class OrderDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_permissions(self):
+        if self.request.method in ["PUT", "DELETE"]:
+            return [IsAdminUser()]
+        return super().get_permissions()
+
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
         serializer = OrderSerializer(order)
