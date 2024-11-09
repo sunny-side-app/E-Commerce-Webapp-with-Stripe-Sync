@@ -131,6 +131,12 @@ class ProductListView(APIView):
 
 
 class ProductDetailView(APIView):
+
+    def get_permissions(self):
+        if self.request.method in ["PUT", "DELETE"]:
+            return [IsAdminUser()]
+        return super().get_permissions()
+
     def get(self, request, *args, **kwargs):
         product = get_product(kwargs.get("pk"))
         serializer = ProductSerializer(product)
