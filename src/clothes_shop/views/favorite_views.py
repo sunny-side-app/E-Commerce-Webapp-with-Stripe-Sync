@@ -3,6 +3,8 @@ import logging
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import APIException, NotFound
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -15,29 +17,34 @@ logger = logging.getLogger(__name__)
 
 
 class FavoriteListCreateView(APIView):
-    def post(self, request):
-        if not request.user.is_authenticated:
-            return Response(
-                {"error": "ログインしていません。"}, status=status.HTTP_401_UNAUTHORIZED
-            )
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        user_id = request.user.id
+        filters = {}
+        filters["user_id"] = user_id
+        favs = Favorite.objects.filter(**filters).order_by("-created_at")
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginated_products = paginator.paginate_queryset(favs, request)
+
+        serializer_data = FavoriteSerializer(paginated_products, many=True).data
+
+        return paginator.get_paginated_response(serializer_data)
+
+    def post(self, request):
         user_id = request.user.id
         product_id = request.data.get("product_id")
         fav = request.data.get("fav")
 
-        if not user_id or not product_id:
-            errMsg = "userId、product_idを設定してください。"
+        if not product_id:
+            errMsg = "product_idを設定してください。"
             logger.error(errMsg)
             raise NotFound(detail=errMsg)
 
         try:
-            user = User.objects.get(pk=user_id)
             product = Product.objects.get(pk=product_id)
-        except User.DoesNotExist:
-            errMsg = f"指定のuser_id:{user_id}は存在しません。"
-            logger.error(errMsg)
-            raise NotFound(detail=errMsg)
-
         except Product.DoesNotExist:
             errMsg = f"指定のproduct_id:{product_id}は存在しません。"
             logger.error(errMsg)
