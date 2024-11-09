@@ -89,7 +89,6 @@ class ProductListView(APIView):
         paginated_products = paginator.paginate_queryset(products, request)
 
         serializer_data = ProductSerializer(paginated_products, many=True).data
-        logger.error(request.user.is_authenticated)
         # 認証ユーザーの場合は、各商品に対して`fav`をチェック]
         if request.user.is_authenticated:
             # ユーザーのお気に入り情報を取得
