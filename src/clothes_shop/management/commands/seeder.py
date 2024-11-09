@@ -11,6 +11,7 @@ from faker import Faker
 
 from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.models.cart import CartItem
+from clothes_shop.models.order import Order, OrderItem
 from clothes_shop.models.product import Product
 from clothes_shop.models.user import User
 from clothes_shop.models.user_interaction import Favorite
@@ -98,6 +99,7 @@ class Command(BaseCommand):
 
         for user in user_list:
             cartItems_num = random.randint(1, 10)
+            orders_num = random.randint(1, 3)
             fav_num = random.randint(1, 5)
 
             cart_product_set = set()
@@ -121,5 +123,49 @@ class Command(BaseCommand):
 
                 Favorite.objects.get_or_create(user=user, product=product)
                 favorite_product_set.add((user.id, product.id))
+
+            for _ in range(orders_num):
+                status_choices = [
+                    "pending",
+                    "confirmed",
+                    "shipped",
+                    "delivered",
+                    "cancelled",
+                    "returned",
+                    "failed",
+                    "completed",
+                ]
+
+                order = Order.objects.create(
+                    user=user,
+                    order_status=random.choice(status_choices),
+                    total_price=0,
+                    order_date=timezone.now(),
+                )
+
+                items_count = random.randint(1, 5)
+                total_price = 0
+
+                order_item_set = set()
+                for _ in range(items_count):
+                    product = random.choice(product_list)
+
+                    while (order.id, product.id) in order_item_set:
+                        product = random.choice(product_list)
+
+                    quantity = random.randint(1, 3)
+                    unit_price = product.price
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        quantity=quantity,
+                        unit_price=unit_price,
+                    )
+
+                    total_price += quantity * unit_price
+                    order_item_set.add((order.id, product.id))
+
+                order.total_price = total_price
+                order.save()
 
         print("Successfully seeded the database using Faker")
