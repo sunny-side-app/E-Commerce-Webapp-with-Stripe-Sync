@@ -10,7 +10,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = serializers.StringRelatedField(many=True)
+    order_items = OrderItemSerializer(many=True)
 
     class Meta:
         model = Order
