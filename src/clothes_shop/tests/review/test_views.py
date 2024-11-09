@@ -93,10 +93,11 @@ class ReviewTests(APITestCase):
         )
 
     def test_product_review_list(self):
-        product_review_list_url = reverse(
-            "clothes_shop:product-review-list", kwargs={"product_id": self.product_1.id}
+        product_review_list_url = reverse("clothes_shop:product-review-list")
+        response = self.client.get(
+            f"{product_review_list_url}?product_Id={self.product_1.id}&page=1"
         )
-        response = self.client.get(f"{product_review_list_url}?page=1")
+
         review = Review.objects.filter(product_id=self.product_1.id)
         serializer = ReviewSerializer(review, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

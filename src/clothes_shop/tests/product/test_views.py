@@ -3,11 +3,14 @@ from unittest.mock import patch
 
 from django.urls import reverse
 from django.utils import timezone
+from faker import Faker
 from rest_framework import status
 from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from clothes_shop.models.attributes import Brand, ClothesType, Size, Target
 from clothes_shop.models.product import Product
+from clothes_shop.models.user import User
 from clothes_shop.serializers.product_serializers import ProductSerializer
 from clothes_shop.services.stripe_service import StripeService
 
@@ -16,6 +19,8 @@ stripe_service = StripeService()
 
 class ProductTests(APITestCase):
     def setUp(self):
+        fake = Faker("ja_JP")
+
         self.create_product_patcher = patch(
             "clothes_shop.services.stripe_service.StripeService.create_product",
             return_value="test",
@@ -69,8 +74,20 @@ class ProductTests(APITestCase):
             is_deleted=False,
             stripe_product_id="product_2",
         )
+        self.user = User.objects.create(
+            name=fake.name(),
+            email=fake.email(),
+            role="registered",
+            email_validated_at=timezone.now(),
+            address=fake.address(),
+            date_joined=timezone.now(),
+            is_active=True,
+            is_staff=True,
+        )
         self.list_url = reverse("clothes_shop:product-list")
         self.detail_url = reverse("clothes_shop:product-detail", kwargs={"pk": self.product_1.id})
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
 
     def test_get_individual(self):
         response = self.client.get(self.detail_url)
