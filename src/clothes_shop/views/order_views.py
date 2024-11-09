@@ -42,11 +42,19 @@ class OrderDetailView(APIView):
 
     def put(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
-        serializer = OrderSerializer(order, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        status_to_update = request.data.get("status")
+        if status_to_update and status_to_update in dict(Order.ORDER_STATUS_CHOICES):
+            serializer = OrderSerializer(
+                order, data={"order_status": status_to_update}, partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                {"error": "Invalid status value provided."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
     def delete(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
