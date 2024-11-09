@@ -4,6 +4,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -31,6 +32,12 @@ def get_product(product_id):
 
 
 class ProductListView(APIView):
+
+    def get_permissions(self):
+        if self.request.method in ["POST", "DELETE"]:
+            return [IsAdminUser()]
+        return super().get_permissions()
+
     def get(self, request):
         size_ids = request.query_params.getlist("size[]")
         target_ids = request.query_params.getlist("target[]")
