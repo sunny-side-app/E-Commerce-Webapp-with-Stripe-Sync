@@ -3,6 +3,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,12 +14,13 @@ logger = logging.getLogger(__name__)
 
 
 class CartItemListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        # TODO　ログインユーザーで取得するようにする
-        userId = request.query_params.get("user")
+        user_id = request.user.id
         filters = {}
-        if userId:
-            filters["user_id"] = userId
+        if user_id:
+            filters["user_id"] = user_id
         else:
             errMsg = "userIdを設定してください。"
             logger.error(errMsg)
@@ -28,7 +30,7 @@ class CartItemListCreateView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        user_id = request.data.get("user_id")
+        user_id = request.user.id
         product_id = request.data.get("product_id")
         quantity = request.data.get("quantity")
         if not user_id or not product_id:
@@ -84,7 +86,7 @@ class CartItemListCreateView(APIView):
         )
 
     def delete(self, request):
-        user_id = request.data.get("user_id")
+        user_id = request.user.id
         product_id = request.data.get("product_id")
 
         if not user_id or not product_id:

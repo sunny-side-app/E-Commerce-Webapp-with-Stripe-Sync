@@ -6,7 +6,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from clothes_shop.models.user import User
-from clothes_shop.serializers.user_serializers import UserSerializer,UserProfileSerializer
+from clothes_shop.serializers.user_serializers import (
+    CustomTokenObtainPairSerializer,
+    UserSerializer,
+    UserProfileSerializer
+)
 from clothes_shop.services.stripe_service import CustomerData, StripeService
 
 logger = logging.getLogger(__name__)
@@ -25,6 +29,13 @@ def get_user(user_id) -> User:
         errMsg = f"想定外のエラーが発生しました: {str(e)}"
         logger.error(errMsg)
         raise APIException(detail=errMsg)
+
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserListCreateView(generics.ListCreateAPIView):
