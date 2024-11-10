@@ -15,7 +15,13 @@ class OrderListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        orders = Order.objects.all()
+        mypage_flag = request.query_params.get("mypage_flag")
+        if mypage_flag:
+            filters = {}
+            filters["user"] = request.user
+            orders = Order.objects.filter(**filters).order_by("-created_at")
+        else:
+            orders = Order.objects.all().order_by("-created_at")
 
         paginator = PageNumberPagination()
         paginator.page_size = 10
