@@ -1,5 +1,8 @@
+import logging
+
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
+from rest_framework.exceptions import APIException, NotFound, PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,12 +13,26 @@ from clothes_shop.serializers.order_serializers import (
     OrderSerializer,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class OrderListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        orders = Order.objects.all()
+        mypage_flag = request.query_params.get("mypage_flag")
+        if mypage_flag:
+            filters = {}
+            filters["user"] = request.user
+            orders = Order.objects.filter(**filters).order_by("-created_at")
+        else:
+            if request.user.is_staff:
+
+                orders = Order.objects.all().order_by("-created_at")
+            else:
+                errMsg = f"ログインユーザー {request.user.id} はadminユーザーではありません。"
+                logger.error(errMsg)
+                raise PermissionDenied(detail=errMsg)
 
         paginator = PageNumberPagination()
         paginator.page_size = 10
