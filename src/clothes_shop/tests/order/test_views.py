@@ -66,7 +66,7 @@ class OrderTests(APITestCase):
             address=fake.address(),
             date_joined=timezone.now(),
             is_active=True,
-            is_staff=True,
+            is_staff=False,
         )
         self.user_other = User.objects.create(
             stripe_customer_id="user_other",
@@ -78,6 +78,17 @@ class OrderTests(APITestCase):
             date_joined=timezone.now(),
             is_active=True,
             is_staff=False,
+        )
+        self.user_admin = User.objects.create(
+            stripe_customer_id="user_admin",
+            name=fake.name(),
+            email=fake.email(),
+            role="registered",
+            email_validated_at=timezone.now(),
+            address=fake.address(),
+            date_joined=timezone.now(),
+            is_active=True,
+            is_staff=True,
         )
         status_choices = [
             "pending",
@@ -125,11 +136,12 @@ class OrderTests(APITestCase):
         )
         self.order_other.save()
 
-        refresh = RefreshToken.for_user(self.user_login)
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
         self.list_url = reverse("clothes_shop:order-list-create")
+        self.detail_url = reverse("clothes_shop:order-detail", kwargs={"pk": self.order_login.id})
 
     def test_get_allOrders(self):
+        refresh = RefreshToken.for_user(self.user_admin)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
         response = self.client.get(self.list_url, {})
         orders = Order.objects.all().order_by("-created_at")
         serializer = OrderSerializer(orders, many=True)
@@ -137,8 +149,28 @@ class OrderTests(APITestCase):
         self.assertEqual(response.data["results"], serializer.data)
 
     def test_get_myOrders(self):
+        refresh = RefreshToken.for_user(self.user_login)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
         response = self.client.get(self.list_url, {"mypage_flag": True})
         orders = Order.objects.filter(user_id=self.user_login.id).order_by("-created_at")
         serializer = OrderSerializer(orders, many=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["results"], serializer.data)
+
+    def test_admin_user_get_order_detail(self):
+        refresh = RefreshToken.for_user(self.user_admin)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_order_user_can_access_own_order(self):
+        refresh = RefreshToken.for_user(self.user_login)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_other_user_denied_order_detail(self):
+        refresh = RefreshToken.for_user(self.user_other)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
+        response = self.client.get(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

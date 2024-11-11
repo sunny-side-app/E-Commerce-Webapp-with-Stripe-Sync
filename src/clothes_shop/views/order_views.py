@@ -59,6 +59,12 @@ class OrderDetailView(APIView):
 
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
+        if not request.user.is_staff and request.user.id != order.user.id:
+            errMsg = (
+                f"ログインユーザー はadminユーザーではなく、かつ当該orderの注文者でもありません。"
+            )
+            logger.error(errMsg)
+            raise PermissionDenied(detail=errMsg)
         serializer = OrderSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
