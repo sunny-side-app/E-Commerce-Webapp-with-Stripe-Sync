@@ -65,3 +65,18 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(validated_data["password"])
         instance.save()
         return instance
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'email',
+            'name',
+            'password',
+            'role', 
+            'is_active', 
+            'is_staff', 
+            'address',
+            ]
+        read_only_fields = ['id', 'is_active', 'is_staff']

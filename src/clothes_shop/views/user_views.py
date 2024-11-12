@@ -1,6 +1,6 @@
 import logging
 
-from rest_framework import generics, status
+from rest_framework import generics, permissions, status
 from rest_framework.exceptions import APIException, NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,6 +9,7 @@ from clothes_shop.models.user import User
 from clothes_shop.serializers.user_serializers import (
     CustomTokenObtainPairSerializer,
     UserSerializer,
+    UserProfileSerializer
 )
 from clothes_shop.services.stripe_service import CustomerData, StripeService
 
@@ -79,3 +80,11 @@ class UserDetailView(APIView):
         stripe_service.delete_customer(user.stripe_customer_id)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
