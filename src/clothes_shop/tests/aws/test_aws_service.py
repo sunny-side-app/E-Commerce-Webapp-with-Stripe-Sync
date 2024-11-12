@@ -1,4 +1,3 @@
-import unittest
 from io import BytesIO
 from unittest.mock import MagicMock, patch
 
@@ -35,20 +34,15 @@ class AWSServiceTests(APITestCase):
 
     @patch("clothes_shop.services.aws_service.boto3.client")
     def test_upload_to_s3_success(self, mock_s3_client):
-        # S3クライアントのモックを設定し、upload_fileobjが正常に動作するようにする
         s3_instance = mock_s3_client.return_value
-        s3_instance.upload_fileobj.return_value = None  # 成功時はNoneを返す
+        s3_instance.upload_fileobj.return_value = None
 
-        # aws_service = AWS_Service()
-
-        # ダミーのファイルを作成してアップロードをテスト
         with open("dummy.jpg", "wb") as file:
             file.write(b"dummy data")
         with open("dummy.jpg", "rb") as file:
             result = self.aws_service.upload_to_s3(file)
 
-        # テスト結果を検証
-        self.assertIsNotNone(result)  # S3 URLが返されていることを確認
+        self.assertIsNotNone(result)
 
     @patch("clothes_shop.services.aws_service.boto3.client")
     def test_upload_to_s3_failure(self, mock_s3_client):
