@@ -42,10 +42,8 @@ class AWS_Service:
             logger.error(ValueError("アップロード画像はjpegかpngのみ"))
             raise ValueError("アップロード画像はjpegかpngのみ")
         try:
-
             self.s3_client.upload_fileobj(file, self.bucket, object_name)
             logger.info(f"Successfully uploaded {file.name} to {self.bucket}/{object_name}")
-
             s3_url = f"https://{self.bucket}.s3.amazonaws.com/{object_name}"
             return s3_url
         except Exception as e:
