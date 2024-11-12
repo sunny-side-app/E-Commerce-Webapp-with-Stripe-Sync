@@ -10,6 +10,7 @@ class Product(models.Model):
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     stripe_product_id = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, unique=True)
+    img_url = models.URLField(null=True, blank=True)
     description = models.TextField()
     category = models.CharField(max_length=100)
     price = models.IntegerField()
