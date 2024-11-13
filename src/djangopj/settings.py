@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 import environ
 
@@ -167,8 +167,8 @@ DATABASES = {
         "PASSWORD": env("MYSQL_APP_USER_PASSWORD"),
         "HOST": env("MYSQL_HOST"),
         "PORT": env("MYSQL_PORT"),
-        'TEST': {
-            'NAME': env("MYSQL_TEST_DB_NAME"),
+        "TEST": {
+            "NAME": env("MYSQL_TEST_DB_NAME"),
         },
     }
 }
@@ -220,15 +220,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 # REST Framework settings
 REST_FRAMEWORK = {
     "COERCE_DECIMAL_TO_STRING": False,
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': True,
-    'UPDATE_LAST_LOGIN': True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ROTATE_REFRESH_TOKENS": True,
+    "UPDATE_LAST_LOGIN": True,
 }
-AUTH_USER_MODEL = 'clothes_shop.User'
+AUTH_USER_MODEL = "clothes_shop.User"

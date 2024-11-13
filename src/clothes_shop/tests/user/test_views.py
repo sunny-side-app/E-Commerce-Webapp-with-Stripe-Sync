@@ -1,12 +1,12 @@
-from django.test import override_settings
-from rest_framework.test import APITestCase
-from rest_framework import status
-from django.urls import reverse
-from datetime import timedelta, datetime, timezone
-from rest_framework_simplejwt.tokens import AccessToken
-import time
-from clothes_shop.models.user import User
+from datetime import datetime, timedelta, timezone
 
+from django.test import override_settings
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
+from rest_framework_simplejwt.tokens import AccessToken
+
+from clothes_shop.models.user import User
 
 
 class UserAPITests(APITestCase):
@@ -42,34 +42,33 @@ class UserAPITests(APITestCase):
         response_delete = self.client.delete(user_detail_url, delete_user_data, format="json")
         self.assertEqual(response_delete.status_code, status.HTTP_204_NO_CONTENT)
 
+
 class UserProfileViewTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="testuser@example.com",
-            name="Test User",
-            password="testpass",
-            role="registered"
+            email="testuser@example.com", name="Test User", password="testpass", role="registered"
         )
         self.client.force_authenticate(user=self.user)
 
     def test_retrieve_user_profile(self):
-        url = reverse('clothes_shop:user-profile')
+        url = reverse("clothes_shop:user-profile")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['name'], self.user.name)
-        self.assertEqual(response.data['email'], self.user.email)
-        self.assertEqual(response.data['role'], self.user.role)
-        self.assertEqual(response.data['address'], self.user.address)
-        self.assertEqual(response.data['is_active'], self.user.is_active)
+        self.assertEqual(response.data["name"], self.user.name)
+        self.assertEqual(response.data["email"], self.user.email)
+        self.assertEqual(response.data["role"], self.user.role)
+        self.assertEqual(response.data["address"], self.user.address)
+        self.assertEqual(response.data["is_active"], self.user.is_active)
 
     def test_update_user_profile(self):
-        url = reverse('clothes_shop:user-profile') 
-        data = {'name': 'Updated User', 'address': '123 Updated Street'}
+        url = reverse("clothes_shop:user-profile")
+        data = {"name": "Updated User", "address": "123 Updated Street"}
         response = self.client.patch(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.name, 'Updated User')
-        self.assertEqual(self.user.address, '123 Updated Street')
+        self.assertEqual(self.user.name, "Updated User")
+        self.assertEqual(self.user.address, "123 Updated Street")
+
 
 class TokenAuthTests(APITestCase):
     def setUp(self):
@@ -88,15 +87,21 @@ class TokenAuthTests(APITestCase):
         self.assertIn("access", response.data)
         self.assertIn("refresh", response.data)
 
+
 class UserProfileUnauthorizedAccessTests(APITestCase):
     def test_unauthorized_access(self):
-        url = reverse('clothes_shop:user-profile')
+        url = reverse("clothes_shop:user-profile")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED) # 認証なしでプロフィール取得を試みる
-        
+        self.assertEqual(
+            response.status_code, status.HTTP_401_UNAUTHORIZED
+        )  # 認証なしでプロフィール取得を試みる
+
         data = {"name": "Unauthorized User"}
         response = self.client.patch(url, data)
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED) # 認証なしでプロフィール更新を試みる
+        self.assertEqual(
+            response.status_code, status.HTTP_401_UNAUTHORIZED
+        )  # 認証なしでプロフィール更新を試みる
+
 
 class TokenExpiryTests(APITestCase):
     def setUp(self):
@@ -108,11 +113,13 @@ class TokenExpiryTests(APITestCase):
             is_active=True,
         )
 
-    @override_settings(SIMPLE_JWT={'ACCESS_TOKEN_LIFETIME': timedelta(seconds=1)})
+    @override_settings(SIMPLE_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)})
     def test_expired_token_access(self):
         token = AccessToken.for_user(self.user)  # トークンを発行
-        token['exp'] = datetime.now(timezone.utc) - timedelta(seconds=1)  # 有効期限を過去に設定
-        url = reverse('clothes_shop:user-profile')
+        token["exp"] = datetime.now(timezone.utc) - timedelta(seconds=1)  # 有効期限を過去に設定
+        url = reverse("clothes_shop:user-profile")
 
-        response = self.client.get(url, HTTP_AUTHORIZATION=f"Bearer {token}") # 期限切れのトークンでリクエストを送信
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {token}"
+        )  # 期限切れのトークンでリクエストを送信
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

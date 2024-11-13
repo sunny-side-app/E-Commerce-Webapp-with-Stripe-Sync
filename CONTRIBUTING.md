@@ -28,6 +28,9 @@ CHECKOUT_URL_SUCCESS=＜決済成功後に遷移する画面URL＞
 CHECKOUT_URL_CANCEL=＜決済キャンセル時に遷移する画面URL＞
 DEMO_PRODUCT_COUNT=＜デモ製品データ数＞
 DEMO_USER_COUNT=＜デモユーザーデータ数＞
+AWS_ACCESS_KEY_ID=エクセルファイル参照
+AWS_SECRET_ACCESS_KEY=エクセルファイル参照
+AWS_S3_IMAGE_BUCKET=エクセルファイル参照
 ```
 
 # 開発手順
