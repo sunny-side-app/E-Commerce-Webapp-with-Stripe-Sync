@@ -41,11 +41,6 @@ urlpatterns = [
         review_views.UserProductReviewDetailView.as_view(),
         name="user-product-review-detail",
     ),
-    path(
-        "api/user-reviews/<int:user_id>/",
-        review_views.UserReviewListView.as_view(),
-        name="user-review-list",
-    ),
     # User API URLs
     path("api/users/", user_views.UserListCreateView.as_view(), name="user-list-create"),
     path("api/users/<int:user_id>/", user_views.UserDetailView.as_view(), name="user-detail"),
