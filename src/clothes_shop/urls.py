@@ -37,7 +37,7 @@ urlpatterns = [
         name="product-review-list",
     ),
     path(
-        "api/product-reviews/<int:product_id>/user/<int:user_id>/",
+        "api/product-reviews/<int:product_id>/",
         review_views.UserProductReviewDetailView.as_view(),
         name="user-product-review-detail",
     ),
@@ -49,7 +49,7 @@ urlpatterns = [
     # User API URLs
     path("api/users/", user_views.UserListCreateView.as_view(), name="user-list-create"),
     path("api/users/<int:user_id>/", user_views.UserDetailView.as_view(), name="user-detail"),
-    path('api/profile/', user_views.UserProfileView.as_view(), name='user-profile'),
+    path("api/profile/", user_views.UserProfileView.as_view(), name="user-profile"),
     # Favorite API URLs
     path(
         "api/favorites/",
