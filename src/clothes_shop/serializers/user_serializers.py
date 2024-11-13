@@ -80,3 +80,36 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'address',
             ]
         read_only_fields = ['id', 'is_active', 'is_staff']
+
+class UserSignupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["name", "email", "password"]
+        extra_kwargs = {
+            "password": {"write_only": True, "min_length": 8},
+            "name": {"required": True},
+            "email": {"required": True},
+        }
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("このメールアドレスは既に使用されています。")
+        return value
+
+    def validate_name(self, value):
+        if len(value) < 2:
+            raise serializers.ValidationError("名前は2文字以上で入力してください。")
+        return value
+
+    def create(self, validated_data):
+        user = User(
+            name=validated_data["name"],
+            email=validated_data["email"],
+            stripe_customer_id=validated_data.get("stripe_customer_id", ""),
+            role=validated_data.get("role", "guest"),
+            is_active=validated_data.get("is_active", False), 
+        )
+        user.set_password(validated_data["password"])
+        user.save()
+        return user

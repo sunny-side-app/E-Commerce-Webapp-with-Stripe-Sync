@@ -4,11 +4,13 @@ from rest_framework import generics, permissions, status
 from rest_framework.exceptions import APIException, NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from clothes_shop.models.user import User
 from clothes_shop.serializers.user_serializers import (
     CustomTokenObtainPairSerializer,
     UserSerializer,
+    UserSignupSerializer,
     UserProfileSerializer
 )
 from clothes_shop.services.stripe_service import CustomerData, StripeService
@@ -29,9 +31,6 @@ def get_user(user_id) -> User:
         errMsg = f"想定外のエラーが発生しました: {str(e)}"
         logger.error(errMsg)
         raise APIException(detail=errMsg)
-
-
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -88,3 +87,35 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+class UserSignupView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSignupSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        try:
+            customer_data = CustomerData(
+                name=serializer.validated_data["name"],
+                email=serializer.validated_data["email"],
+            )
+            stripe_customer_id = stripe_service.create_customer(customer_data)
+            logger.debug(f"Stripe customer create 成功: {stripe_customer_id}")
+        except Exception as e:
+            logger.error("Stripe customer create中のエラー: %s", str(e))
+            raise ValueError("Stripeの顧客登録に失敗しました。")
+
+        # ユーザー保存
+        serializer.save(
+            stripe_customer_id=stripe_customer_id,
+            role="guest",
+            is_active=False,
+        )
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.data = {
+            "message": "ユーザー登録が成功しました。メールを確認してください。",
+            "user": response.data,
+        }
+        return response
