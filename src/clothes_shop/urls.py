@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from clothes_shop.views import (
     cart_views,
     category_views,
+    check_access_views,
     checkout_views,
     favorite_views,
     order_views,
@@ -48,7 +49,7 @@ urlpatterns = [
     path("api/profile/", user_views.UserProfileView.as_view(), name="user-profile"),
     path(
         "api/check-access/",
-        user_views.CheckAccessAndAdminView.as_view(),
+        check_access_views.CheckAccessAndAdminView.as_view(),
         name="check_access_and_admin",
     ),
     # Favorite API URLs
