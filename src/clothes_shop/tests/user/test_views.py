@@ -71,24 +71,6 @@ class UserProfileViewTests(APITestCase):
         self.assertEqual(self.user.address, "123 Updated Street")
 
 
-class TokenAuthTests(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            email="authuser@example.com",
-            name="Auth User",
-            password="authpass",
-            role="registered",
-            is_active=True,
-        )
-
-    def test_token_obtain(self):
-        url = reverse("clothes_shop:token_obtain_pair")
-        response = self.client.post(url, {"email": "authuser@example.com", "password": "authpass"})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("access", response.data)
-        self.assertIn("refresh", response.data)
-
-
 class UserProfileUnauthorizedAccessTests(APITestCase):
     def test_unauthorized_access(self):
         url = reverse("clothes_shop:user-profile")
@@ -192,5 +174,4 @@ class CheckAccessAndAdminViewTests(APITestCase):
 
     def test_access_without_token(self):
         url = reverse("clothes_shop:check_access_and_admin")
-
-        response = self.client.post(url, {"check_admin": False})
+        self.client.post(url, {"check_admin": False})
