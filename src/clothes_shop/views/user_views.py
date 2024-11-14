@@ -4,11 +4,9 @@ from rest_framework import generics, permissions, status
 from rest_framework.exceptions import APIException, NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from clothes_shop.models.user import User
 from clothes_shop.serializers.user_serializers import (
-    CustomTokenObtainPairSerializer,
     UserProfileSerializer,
     UserSerializer,
 )
@@ -30,10 +28,6 @@ def get_user(user_id) -> User:
         errMsg = f"想定外のエラーが発生しました: {str(e)}"
         logger.error(errMsg)
         raise APIException(detail=errMsg)
-
-
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
 
 
 class UserListCreateView(generics.ListCreateAPIView):
