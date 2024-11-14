@@ -45,6 +45,11 @@ urlpatterns = [
     path("api/users/", user_views.UserListCreateView.as_view(), name="user-list-create"),
     path("api/users/<int:user_id>/", user_views.UserDetailView.as_view(), name="user-detail"),
     path("api/profile/", user_views.UserProfileView.as_view(), name="user-profile"),
+    path(
+        "api/check-access/",
+        user_views.CheckAccessAndAdminView.as_view(),
+        name="check_access_and_admin",
+    ),
     # Favorite API URLs
     path(
         "api/favorites/",
