@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from clothes_shop.models.product import Product
-from clothes_shop.models.user_interaction import Favorite
+from clothes_shop.models.user_interaction import Favorite, WishList
 from clothes_shop.serializers.product_serializers import ProductSerializer
 from clothes_shop.services.aws_service import AWS_Service
 from clothes_shop.services.stripe_service import StripeService
@@ -101,7 +101,7 @@ class ProductListView(APIView):
                 product["fav"] = product["id"] in user_favorite_product_ids
             # ユーザーのウィッシュリスト情報を取得
             user_wish_product_ids = set(
-                Favorite.objects.filter(user=request.user.id).values_list("product_id", flat=True)
+                WishList.objects.filter(user=request.user.id).values_list("product_id", flat=True)
             )
             for product in serializer_data:
                 product["wish"] = product["id"] in user_wish_product_ids
