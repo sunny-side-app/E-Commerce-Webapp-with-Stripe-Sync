@@ -4,7 +4,6 @@ from rest_framework import generics, permissions, status
 from rest_framework.exceptions import APIException, NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from clothes_shop.models.user import User
 from clothes_shop.serializers.user_serializers import (
@@ -96,17 +95,17 @@ class UserSignupView(generics.CreateAPIView):
                 email=serializer.validated_data["email"],
             )
             stripe_customer_id = stripe_service.create_customer(customer_data)
+            
+            serializer.save(
+                stripe_customer_id=stripe_customer_id,
+                role="registered",
+                is_active=False,
+            )
         except Exception as e:
-            logger.error("Stripe customer create中のエラー: %s", str(e))
-            raise APIException("Stripeの顧客登録に失敗しました。")
-
-        # ユーザー保存
-        serializer.save(
-            stripe_customer_id=stripe_customer_id,
-            role="guest",
-            is_active=False,
-        )
-
+            api_exception = APIException(detail="Stripeの顧客登録に失敗しました。")
+            api_exception.status_code = 500
+            raise api_exception
+    
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
         response.data = {

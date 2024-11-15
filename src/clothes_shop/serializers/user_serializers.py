@@ -77,7 +77,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
             name=validated_data["name"],
             email=validated_data["email"],
             stripe_customer_id=validated_data.get("stripe_customer_id", ""),
-            role=validated_data.get("role", "guest"),
+            role=validated_data.get("role", "registered"),
             is_active=validated_data.get("is_active", False),
         )
         user.set_password(validated_data["password"])

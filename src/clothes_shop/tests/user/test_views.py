@@ -120,12 +120,12 @@ class UserSignupViewTests(APITestCase):
         self.assertIn("user", response.data)
         self.assertEqual(response.data["user"]["name"], signup_data["name"])
         self.assertEqual(response.data["user"]["email"], signup_data["email"])
-        self.assertEqual(response.data["user"]["role"], "guest")
+        self.assertEqual(response.data["user"]["role"], "registered")
         self.assertFalse(response.data["user"]["is_active"])
 
         user = User.objects.get(email=signup_data["email"])
         self.assertEqual(user.name, signup_data["name"])
-        self.assertEqual(user.role, "guest")
+        self.assertEqual(user.role, "registered")
         self.assertFalse(user.is_active)
 
     @patch("clothes_shop.views.user_views.stripe_service.create_customer")
@@ -141,9 +141,5 @@ class UserSignupViewTests(APITestCase):
         response = self.client.post(url, signup_data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
-
         self.assertIn("detail", response.data)
         self.assertEqual(response.data["detail"], "Stripeの顧客登録に失敗しました。")
-        self.assertEqual(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
-        )  # 認証なしでプロフィール更新を試みる
