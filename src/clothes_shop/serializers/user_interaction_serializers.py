@@ -32,6 +32,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
 
 class WishListSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField(read_only=True)
+    product_pk = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), write_only=True)
+
     class Meta:
-        model = WishList
-        fields = ("user", "product", "is_public")
+        model = Favorite
+        fields = ("user", "product", "product_pk")
+
+    def get_product(self, obj: Favorite):
+        return ProductSerializer(obj.product).data

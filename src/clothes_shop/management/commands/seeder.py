@@ -14,7 +14,7 @@ from clothes_shop.models.cart import CartItem
 from clothes_shop.models.order import Order, OrderItem
 from clothes_shop.models.product import Product
 from clothes_shop.models.user import User
-from clothes_shop.models.user_interaction import Favorite
+from clothes_shop.models.user_interaction import Favorite, WishList
 from clothes_shop.services.stripe_service import CustomerData, StripeService
 
 BASE_DIR = Path(__file__).resolve().parents[4]
@@ -101,6 +101,7 @@ class Command(BaseCommand):
             cartItems_num = random.randint(1, 10)
             orders_num = random.randint(1, 3)
             fav_num = random.randint(1, 5)
+            wish_num = random.randint(1, 5)
 
             cart_product_set = set()
             for _ in range(cartItems_num):
@@ -123,6 +124,16 @@ class Command(BaseCommand):
 
                 Favorite.objects.get_or_create(user=user, product=product)
                 favorite_product_set.add((user.id, product.id))
+
+            wish_product_set = set()
+            for _ in range(wish_num):
+                product = random.choice(product_list)
+
+                while (user.id, product.id) in wish_product_set:
+                    product = random.choice(product_list)
+
+                WishList.objects.get_or_create(user=user, product=product)
+                wish_product_set.add((user.id, product.id))
 
             for _ in range(orders_num):
                 status_choices = [
