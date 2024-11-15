@@ -11,10 +11,12 @@ from rest_framework.views import APIView
 from clothes_shop.models.product import Product
 from clothes_shop.models.user_interaction import Favorite
 from clothes_shop.serializers.product_serializers import ProductSerializer
+from clothes_shop.services.aws_service import AWS_Service
 from clothes_shop.services.stripe_service import StripeService
 
 logger = logging.getLogger(__name__)
 stripe_service = StripeService()
+aws_service = AWS_Service()
 
 
 def get_product(product_id):
@@ -105,19 +107,37 @@ class ProductListView(APIView):
         return paginator.get_paginated_response(serializer_data)
 
     def post(self, request):
-        serializer = ProductSerializer(data=request.data)
+        product_img_file = request.FILES.get("imgFile")
+        data = request.data.copy()
+        data["img_url"] = None
+        logger.error(data)
+
+        if product_img_file:
+            try:
+                img_url = aws_service.upload_to_s3(product_img_file)
+                data["img_url"] = img_url
+                logger.error(img_url)
+            except Exception as e:
+                logger.error(f"画像のアップロード中にエラーが発生しました: {e}")
+                return Response(
+                    {"error": "画像のアップロードに失敗しました"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+        serializer = ProductSerializer(data=data)
+
         if serializer.is_valid() is False:
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        stripe_product_id = stripe_service.create_product(
-            request.data["name"], request.data["price"]
-        )
+
+        stripe_product_id = stripe_service.create_product(data["name"], data["price"])
         try:
             serializer.save(stripe_product_id=stripe_product_id)
         except Exception as e:
             logger.error(e)
             stripe_service.delete_product(stripe_product_id)
             raise e
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):
@@ -143,7 +163,24 @@ class ProductDetailView(APIView):
 
     def put(self, request, *args, **kwargs):
         product = get_product(kwargs.get("pk"))
-        serializer = ProductSerializer(product, data=request.data, partial=True)
+        product_img_file = request.FILES.get("imgFile")
+        data = request.data.copy()
+        data["img_url"] = None
+        logger.error(data)
+        if product_img_file:
+            try:
+                img_url = aws_service.upload_to_s3(product_img_file)
+                data["img_url"] = img_url
+                logger.error(img_url)
+
+            except Exception as e:
+                logger.error(f"画像のアップロード中にエラーが発生しました: {e}")
+                return Response(
+                    {"error": "画像のアップロードに失敗しました"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+        serializer = ProductSerializer(product, data, partial=True)
         if not serializer.is_valid():
             logger.error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

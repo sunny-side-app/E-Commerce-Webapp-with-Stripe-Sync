@@ -1,9 +1,10 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from clothes_shop.views import (
     cart_views,
     category_views,
+    check_access_views,
     checkout_views,
     favorite_views,
     order_views,
@@ -11,6 +12,7 @@ from clothes_shop.views import (
     product_views,
     review_views,
     shipping_views,
+    token_views,
     user_views,
     wishlist_views,
 )
@@ -18,7 +20,7 @@ from clothes_shop.views import (
 app_name = "clothes_shop"
 
 urlpatterns = [
-    path("api/token/", user_views.CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/", token_views.CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # Product API URLs
     path("api/products/", product_views.ProductListView.as_view(), name="product-list"),
@@ -37,20 +39,20 @@ urlpatterns = [
         name="product-review-list",
     ),
     path(
-        "api/product-reviews/<int:product_id>/user/<int:user_id>/",
+        "api/product-reviews/<int:product_id>/",
         review_views.UserProductReviewDetailView.as_view(),
         name="user-product-review-detail",
-    ),
-    path(
-        "api/user-reviews/<int:user_id>/",
-        review_views.UserReviewListView.as_view(),
-        name="user-review-list",
     ),
     # User API URLs
     path("api/users/", user_views.UserListCreateView.as_view(), name="user-list-create"),
     path("api/users/<int:user_id>/", user_views.UserDetailView.as_view(), name="user-detail"),
     path('api/profile/', user_views.UserProfileView.as_view(), name='user-profile'),
     path("api/signup/", user_views.UserSignupView.as_view(), name="user-signup"),
+    path(
+        "api/check-access/",
+        check_access_views.CheckAccessAndAdminView.as_view(),
+        name="check_access_and_admin",
+    ),
     # Favorite API URLs
     path(
         "api/favorites/",

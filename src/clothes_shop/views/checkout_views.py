@@ -1,6 +1,7 @@
 import logging
 
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,12 +11,15 @@ from clothes_shop.serializers.checkout_serializers import (
 )
 from clothes_shop.services.stripe_service import CheckoutData, StripeService
 from clothes_shop.views.product_views import get_product
+from clothes_shop.views.user_views import get_user
 
 logger = logging.getLogger(__name__)
 striep_service = StripeService()
 
 
 class StripeCheckoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         serializer = CheckoutListSerializer(data=request.data)
         if serializer.is_valid() is False:
@@ -36,3 +40,7 @@ class StripeCheckoutView(APIView):
         redirect_url = striep_service.checkout(checkout_data_list)
         data = {"url": redirect_url}
         return Response(data, status=status.HTTP_200_OK)
+
+    def __getLoginUserEmail(self, user_id: int) -> str:
+        user = get_user(user_id)
+        return user.email
