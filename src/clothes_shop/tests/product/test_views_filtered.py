@@ -156,11 +156,12 @@ class ProductTests(APITestCase):
         product = Product.objects.filter(is_deleted=False, release_date__lt=timezone.now())
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -171,11 +172,12 @@ class ProductTests(APITestCase):
         product = Product.objects.filter(is_deleted=True)
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -188,11 +190,12 @@ class ProductTests(APITestCase):
         product = Product.objects.filter(is_deleted=False, release_date__lt=self.one_week_after)
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -211,11 +214,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -228,11 +232,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -245,11 +250,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -262,11 +268,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -290,11 +297,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -312,11 +320,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if key != "fav" and key != "wish"}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -338,11 +347,12 @@ class ProductTests(APITestCase):
         )
         serializer = ProductSerializer(product, many=True)
         response_data = [
-            {key: value for key, value in item.items() if key != "fav"}
+            {key: value for key, value in item.items() if (key != "fav" and key != "wish")}
             for item in response.data["results"]
         ]
         serializer_data = [
-            {key: value for key, value in item.items() if key != "fav"} for item in serializer.data
+            {key: value for key, value in item.items() if (key != "fav" and key != "wish")}
+            for item in serializer.data
         ]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)

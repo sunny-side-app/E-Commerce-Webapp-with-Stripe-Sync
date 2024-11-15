@@ -97,13 +97,20 @@ class ProductListView(APIView):
             user_favorite_product_ids = set(
                 Favorite.objects.filter(user=request.user.id).values_list("product_id", flat=True)
             )
-            logger.error(user_favorite_product_ids)
             for product in serializer_data:
                 product["fav"] = product["id"] in user_favorite_product_ids
+            # ユーザーのウィッシュリスト情報を取得
+            user_wish_product_ids = set(
+                Favorite.objects.filter(user=request.user.id).values_list("product_id", flat=True)
+            )
+            for product in serializer_data:
+                product["wish"] = product["id"] in user_wish_product_ids
         else:
-            # ゲストユーザーの場合はすべて`fav`を`False`に設定
+            # ゲストユーザーの場合はすべて`fav`と`wish`を`False`に設定
             for product in serializer_data:
                 product["fav"] = False
+                product["wish"] = False
+
         return paginator.get_paginated_response(serializer_data)
 
     def post(self, request):
