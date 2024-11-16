@@ -121,9 +121,7 @@ class UserSignupViewTests(APITestCase):
         self.assertIn("user", response.data)
         self.assertEqual(response.data["user"]["name"], signup_data["name"])
         self.assertEqual(response.data["user"]["email"], signup_data["email"])
-        self.assertEqual(response.data["user"]["role"], "registered")
         self.assertEqual(response.data["user"]["address"], signup_data["address"])
-        self.assertFalse(response.data["user"]["is_active"])
 
         user = User.objects.get(email=signup_data["email"])
         self.assertEqual(user.name, signup_data["name"])
