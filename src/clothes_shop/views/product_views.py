@@ -166,7 +166,31 @@ class ProductDetailView(APIView):
     def get(self, request, *args, **kwargs):
         product = get_product(kwargs.get("pk"))
         serializer = ProductSerializer(product)
-        return Response(serializer.data)
+        serializer_data = serializer.data
+
+        # もし、認証ユーザーからのリクエストの場合は、favとwishList情報を取得する
+        if request.user.is_authenticated:
+
+            # ユーザーのお気に入り情報を取得
+            user_favorite_product_exist = Favorite.objects.filter(
+                user=request.user.id, product=product.id
+            ).exists()
+
+            serializer_data["fav"] = user_favorite_product_exist
+
+            # ユーザーのウィッシュリスト情報を取得
+            user_wish_product_exist = WishList.objects.filter(
+                user=request.user.id, product=product.id
+            ).exists()
+
+            serializer_data["wish"] = user_wish_product_exist
+        else:
+            serializer_data["fav"] = False
+            serializer_data["wish"] = False
+
+        logger.error(serializer_data)
+
+        return Response(serializer_data)
 
     def put(self, request, *args, **kwargs):
         product = get_product(kwargs.get("pk"))
