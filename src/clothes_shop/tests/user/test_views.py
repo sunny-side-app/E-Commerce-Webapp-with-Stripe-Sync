@@ -107,7 +107,8 @@ class UserSignupViewTests(APITestCase):
         signup_data = {
             "name": "Test User",
             "email": "testuser@example.com",
-            "password": "securepassword123"
+            "password": "securepassword123",
+            "address": "123 Test Street",
         }
         with patch("clothes_shop.views.user_views.stripe_service.create_customer") as mock_create_customer:
             mock_create_customer.return_value = "cus_mocked_id"
@@ -121,11 +122,13 @@ class UserSignupViewTests(APITestCase):
         self.assertEqual(response.data["user"]["name"], signup_data["name"])
         self.assertEqual(response.data["user"]["email"], signup_data["email"])
         self.assertEqual(response.data["user"]["role"], "registered")
+        self.assertEqual(response.data["user"]["address"], signup_data["address"])
         self.assertFalse(response.data["user"]["is_active"])
 
         user = User.objects.get(email=signup_data["email"])
         self.assertEqual(user.name, signup_data["name"])
         self.assertEqual(user.role, "registered")
+        self.assertEqual(user.address, signup_data["address"])
         self.assertFalse(user.is_active)
 
     @patch("clothes_shop.views.user_views.stripe_service.create_customer")

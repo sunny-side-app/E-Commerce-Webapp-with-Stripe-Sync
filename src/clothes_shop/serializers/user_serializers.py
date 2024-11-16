@@ -65,7 +65,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["name", "email", "password", "role", "is_active"]
+        fields = ["name", "email", "password", "address"]
         extra_kwargs = {
             "password": {"write_only": True, "min_length": 8},
             "name": {"required": True},
@@ -76,9 +76,10 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user = User(
             name=validated_data["name"],
             email=validated_data["email"],
+            address=validated_data.get("address", ""),
             stripe_customer_id=validated_data.get("stripe_customer_id", ""),
-            role=validated_data.get("role", "registered"),
-            is_active=validated_data.get("is_active", False),
+            role="registered",
+            is_active=False,
         )
         user.set_password(validated_data["password"])
         user.save()

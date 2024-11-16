@@ -96,11 +96,7 @@ class UserSignupView(generics.CreateAPIView):
             )
             stripe_customer_id = stripe_service.create_customer(customer_data)
             
-            serializer.save(
-                stripe_customer_id=stripe_customer_id,
-                role="registered",
-                is_active=False,
-            )
+            serializer.save(stripe_customer_id=stripe_customer_id)
         except Exception as e:
             api_exception = APIException(detail="Stripeの顧客登録に失敗しました。")
             api_exception.status_code = 500
