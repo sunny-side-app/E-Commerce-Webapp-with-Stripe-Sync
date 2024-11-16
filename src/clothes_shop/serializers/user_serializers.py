@@ -50,16 +50,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',
-            'email',
-            'name',
-            'password',
-            'role', 
-            'is_active', 
-            'is_staff', 
-            'address',
+            "id",
+            "email",
+            "name",
+            "password",
+            "role", 
+            "is_active", 
+            "is_staff", 
+            "address",
             ]
-        read_only_fields = ['id', 'is_active', 'is_staff']
+        read_only_fields = ["id", "is_active", "is_staff"]
 
 class UserSignupSerializer(serializers.ModelSerializer):
 
