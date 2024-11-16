@@ -93,8 +93,11 @@ class ProductTests(APITestCase):
         response = self.client.get(self.detail_url)
         product = Product.objects.get(pk=self.product_1.id)
         serializer = ProductSerializer(product, many=False)
+        serializer_data = serializer.data
+        serializer_data["fav"] = False
+        serializer_data["wish"] = False
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data, serializer_data)
 
     def test_create_cloth(self):
         data = {
