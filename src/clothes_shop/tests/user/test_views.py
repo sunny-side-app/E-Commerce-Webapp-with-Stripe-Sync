@@ -102,32 +102,67 @@ class TokenExpiryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 class UserSignupViewTests(APITestCase):
-    def test_signup_success(self):
-        url = reverse("clothes_shop:user-signup")
-        signup_data = {
+    def setUp(self):
+        self.signup_url = reverse("clothes_shop:user-signup")
+        self.user_data = {
             "name": "Test User",
             "email": "testuser@example.com",
             "password": "securepassword123",
             "address": "123 Test Street",
         }
+
+    def test_signup_success(self):
         with patch("clothes_shop.views.user_views.stripe_service.create_customer") as mock_create_customer:
             mock_create_customer.return_value = "cus_mocked_id"
 
-            response = self.client.post(url, signup_data, format="json")
+            response = self.client.post(self.signup_url, self.user_data, format="json")
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
         self.assertIn("message", response.data)
         self.assertIn("user", response.data)
-        self.assertEqual(response.data["user"]["name"], signup_data["name"])
-        self.assertEqual(response.data["user"]["email"], signup_data["email"])
-        self.assertEqual(response.data["user"]["address"], signup_data["address"])
+        self.assertEqual(response.data["user"]["name"], self.user_data["name"])
+        self.assertEqual(response.data["user"]["email"], self.user_data["email"])
+        self.assertEqual(response.data["user"]["address"], self.user_data["address"])
 
-        user = User.objects.get(email=signup_data["email"])
-        self.assertEqual(user.name, signup_data["name"])
+        user = User.objects.get(email=self.user_data["email"])
+        self.assertEqual(user.name, self.user_data["name"])
         self.assertEqual(user.role, "registered")
-        self.assertEqual(user.address, signup_data["address"])
+        self.assertEqual(user.address, self.user_data["address"])
         self.assertFalse(user.is_active)
+
+    @patch("clothes_shop.views.user_views.stripe_service.create_customer")
+    def test_signup_duplicate_email_not_active(self, mock_create_customer):
+        mock_create_customer.return_value = "cus_mocked_id"
+
+        User.objects.create_user(
+            email=self.user_data["email"],
+            name=self.user_data["name"],
+            password=self.user_data["password"],
+            role="registered",
+            is_active=False,
+        )
+
+        response = self.client.post(self.signup_url, self.user_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "メール認証が未完了です。メールを再送信したのでメールを確認し、リンクをクリックしてメール認証を完了させてください。")
+
+    @patch("clothes_shop.views.user_views.stripe_service.create_customer")
+    def test_signup_duplicate_email_active(self, mock_create_customer):
+        mock_create_customer.return_value = "cus_mocked_id"
+
+        User.objects.create_user(
+            email=self.user_data["email"],
+            name=self.user_data["name"],
+            password=self.user_data["password"],
+            role="registered",
+            is_active=True,
+        )
+
+        response = self.client.post(self.signup_url, self.user_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "このメールアドレスは既に登録されています。")
 
     @patch("clothes_shop.views.user_views.stripe_service.create_customer")
     def test_signup_stripe_failure(self, mock_create_customer):

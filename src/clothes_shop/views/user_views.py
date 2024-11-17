@@ -100,12 +100,28 @@ class UserSignupView(generics.CreateAPIView):
         except Exception as e:
             api_exception = APIException(detail="Stripeの顧客登録に失敗しました。")
             api_exception.status_code = 500
+            logger.error(e)
             raise api_exception
     
     def create(self, request, *args, **kwargs):
+        email = request.data.get("email")
+
+        existing_user = User.objects.filter(email=email).first()
+        if existing_user:
+            if not existing_user.is_active:
+                return Response(
+                    {"error": "メール認証が未完了です。メールを再送信したのでメールを確認し、リンクをクリックしてメール認証を完了させてください。"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                return Response(
+                    {"error": "このメールアドレスは既に登録されています。"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        
         response = super().create(request, *args, **kwargs)
         response.data = {
-            "message": "ユーザー登録が成功しました。メールを確認してください。",
+            "message": "ユーザー登録が成功しました。メールを確認し、リンクをクリックしてメール認証を完了させてください。",
             "user": response.data,
         }
         return response
