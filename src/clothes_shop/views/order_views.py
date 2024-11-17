@@ -1,9 +1,10 @@
 import logging
 
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, status
-from rest_framework.exceptions import APIException, NotFound, PermissionDenied
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class OrderListCreateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         mypage_flag = request.query_params.get("mypage_flag")
@@ -50,11 +51,11 @@ class OrderListCreateView(APIView):
 
 
 class OrderDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.request.method in ["PUT", "DELETE"]:
-            return [permissions.IsAdminUser()]
+            return [IsAdminUser()]
         return super().get_permissions()
 
     def get(self, request, pk):
@@ -91,7 +92,7 @@ class OrderDetailView(APIView):
 
 
 class OrderItemListCreateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         order_items = OrderItem.objects.all()
@@ -107,7 +108,7 @@ class OrderItemListCreateView(APIView):
 
 
 class OrderItemDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         order_item = get_object_or_404(OrderItem, pk=pk)

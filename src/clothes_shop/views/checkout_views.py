@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from clothes_shop.permissions import IsGuestUser, IsRegisteredUser
 from clothes_shop.serializers.checkout_serializers import (
     CheckoutListSerializer,
     CheckoutSerializer,
@@ -18,7 +19,7 @@ striep_service = StripeService()
 
 
 class StripeCheckoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated & (IsRegisteredUser | IsGuestUser)]
 
     def post(self, request):
         serializer = CheckoutListSerializer(data=request.data)
@@ -41,6 +42,14 @@ class StripeCheckoutView(APIView):
         data = {"url": redirect_url}
         return Response(data, status=status.HTTP_200_OK)
 
+    def __isRegisteredUser(self, user_id: int) -> bool:
+        user = get_user(user_id)
+        return user.role == "registered"
+
     def __getLoginUserEmail(self, user_id: int) -> str:
         user = get_user(user_id)
         return user.email
+
+    def __getLoginUserAddress(self, user_id: int) -> str:
+        user = get_user(user_id)
+        return user.address
