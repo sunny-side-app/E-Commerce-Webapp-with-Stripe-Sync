@@ -5,21 +5,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from clothes_shop.permissions import IsGuestUser, IsRegisteredUser
+from clothes_shop.permissions import IsCustomer, IsGuest
 from clothes_shop.serializers.checkout_serializers import (
     CheckoutListSerializer,
     CheckoutSerializer,
 )
 from clothes_shop.services.stripe_service import CheckoutData, StripeService
 from clothes_shop.views.product_views import get_product
-from clothes_shop.views.user_views import get_user
 
 logger = logging.getLogger(__name__)
 striep_service = StripeService()
 
 
 class StripeCheckoutView(APIView):
-    permission_classes = [IsAuthenticated & (IsRegisteredUser | IsGuestUser)]
+    permission_classes = [IsAuthenticated & (IsCustomer | IsGuest)]
 
     def post(self, request):
         serializer = CheckoutListSerializer(data=request.data)
@@ -38,18 +37,9 @@ class StripeCheckoutView(APIView):
             product = get_product(product_id)
             stripe_product_id = product.stripe_product_id
             checkout_data_list.append(CheckoutData(stripe_product_id, amount))
-        redirect_url = striep_service.checkout(checkout_data_list)
+        redirect_url = striep_service.checkout(
+            stripe_customer_id=request.user.stripe_customer_id,
+            checkout_data_list=checkout_data_list,
+        )
         data = {"url": redirect_url}
         return Response(data, status=status.HTTP_200_OK)
-
-    def __isRegisteredUser(self, user_id: int) -> bool:
-        user = get_user(user_id)
-        return user.role == "registered"
-
-    def __getLoginUserEmail(self, user_id: int) -> str:
-        user = get_user(user_id)
-        return user.email
-
-    def __getLoginUserAddress(self, user_id: int) -> str:
-        user = get_user(user_id)
-        return user.address

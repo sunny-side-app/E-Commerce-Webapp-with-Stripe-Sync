@@ -10,7 +10,7 @@ from clothes_shop.serializers.user_serializers import (
     UserProfileSerializer,
     UserSerializer,
 )
-from clothes_shop.services.stripe_service import CustomerData, StripeService
+from clothes_shop.services.stripe_service import Address, CustomerData, StripeService
 
 logger = logging.getLogger(__name__)
 stripe_service = StripeService()
@@ -38,7 +38,24 @@ class UserListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         try:
             serializer.is_valid(raise_exception=True)
-            customerData = CustomerData(name=request.data["name"], email=request.data["email"])
+            customerData = CustomerData(
+                name=request.data["name"],
+                email=request.data["email"],
+                address=Address(
+                    state=request.data["address"]["state"],
+                    city=request.data["address"]["city"],
+                    line1=request.data["address"]["line1"],
+                    line2=request.data["address"]["line2"],
+                    postal_code=request.data["address"]["postal_code"],
+                ),
+                shipping=Address(
+                    state=request.data["shipping"]["state"],
+                    city=request.data["shipping"]["city"],
+                    line1=request.data["shipping"]["line1"],
+                    line2=request.data["shipping"]["line2"],
+                    postal_code=request.data["shipping"]["postal_code"],
+                ),
+            )
             stripe_customer_id = stripe_service.create_customer(customerData)
             serializer.save(stripe_customer_id=stripe_customer_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -20,10 +20,22 @@ class CheckoutData:
         self.product_amount = product_amount
 
 
+class Address:
+    def __init__(self, state: str, city: str, line1: str, line2: str, postal_code: str) -> None:
+        self.country = "JP"
+        self.state = state
+        self.city = city
+        self.line1 = line1
+        self.line2 = line2
+        self.postal_code = postal_code
+
+
 class CustomerData:
-    def __init__(self, name: str, email: str) -> None:
+    def __init__(self, name: str, email: str, address: Address, shipping: Address) -> None:
         self.name = name
         self.email = email
+        self.address = address
+        self.shipping = shipping
 
 
 class StripeService:
@@ -76,12 +88,14 @@ class StripeService:
         stripe.Product.modify(id, active=False)
         return None
 
-    def checkout(self, checkout_data_list: list[CheckoutData]) -> str:
+    def checkout(self, stripe_customer_id: str, checkout_data_list: list[CheckoutData]) -> str:
         line_items: list[Any] = []
         for checkout_data in checkout_data_list:
             price_id: str = self.__get_price(checkout_data.stripe_product_id)
             line_items.append({"price": price_id, "quantity": checkout_data.product_amount})
+
         session = stripe.checkout.Session.create(
+            customer=stripe_customer_id,
             mode="payment",
             line_items=line_items,
             success_url=self.checkout_url_success,
@@ -93,6 +107,25 @@ class StripeService:
         customer: stripe.Customer = stripe.Customer.create(
             name=customerData.name,
             email=customerData.email,
+            address={
+                "country": customerData.address.country,
+                "state": customerData.address.state,
+                "city": customerData.address.city,
+                "line1": customerData.address.line1,
+                "line2": customerData.address.line2,
+                "postal_code": customerData.address.postal_code,
+            },
+            shipping={
+                "name": customerData.name,
+                "address": {
+                    "country": customerData.shipping.country,
+                    "state": customerData.shipping.state,
+                    "city": customerData.shipping.city,
+                    "line1": customerData.shipping.line1,
+                    "line2": customerData.shipping.line2,
+                    "postal_code": customerData.shipping.postal_code,
+                },
+            },
         )
         return customer.id
 
@@ -101,6 +134,25 @@ class StripeService:
             stripe_customer_id,
             name=customerData.name,
             email=customerData.email,
+            address={
+                "country": customerData.address.country,
+                "state": customerData.address.state,
+                "city": customerData.address.city,
+                "line1": customerData.address.line1,
+                "line2": customerData.address.line2,
+                "postal_code": customerData.address.postal_code,
+            },
+            shipping={
+                "name": customerData.name,
+                "address": {
+                    "country": customerData.shipping.country,
+                    "state": customerData.shipping.state,
+                    "city": customerData.shipping.city,
+                    "line1": customerData.shipping.line1,
+                    "line2": customerData.shipping.line2,
+                    "postal_code": customerData.shipping.postal_code,
+                },
+            },
         )
         return None
 

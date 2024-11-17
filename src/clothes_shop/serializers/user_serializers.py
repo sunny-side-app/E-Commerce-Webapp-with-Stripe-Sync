@@ -15,7 +15,6 @@ class UserSerializer(serializers.ModelSerializer):
             "role",
             "is_active",
             "is_staff",
-            "address",
             "date_joined",
             "last_login",
             "created_at",
@@ -24,15 +23,13 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
-        user = User(
+        user = User.objects.create_user(
             stripe_customer_id=validated_data["stripe_customer_id"],
             email=validated_data["email"],
             name=validated_data["name"],
+            password=validated_data["password"],
             role=validated_data["role"],
-            address=validated_data.get("address", ""),
         )
-        user.set_password(validated_data["password"])
-        user.save()
         return user
 
     def update(self, instance, validated_data):
