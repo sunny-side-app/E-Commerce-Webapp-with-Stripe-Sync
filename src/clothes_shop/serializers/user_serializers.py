@@ -84,3 +84,26 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+
+class SendConfirmationEmailSerializer(serializers.Serializer):
+    """
+    メール確認用のシリアライザ。
+    """
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            if user.is_active:
+                raise serializers.ValidationError("このユーザーは既に認証されています。")
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("指定されたメールアドレスのユーザーが見つかりません。")
+
+
+class ConfirmEmailSerializer(serializers.Serializer):
+    """
+    メール認証リンク用のシリアライザ。
+    """
+    uidb64 = serializers.CharField()
+    token = serializers.CharField()
