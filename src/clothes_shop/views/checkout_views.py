@@ -45,3 +45,21 @@ class StripeCheckoutView(APIView):
         )
         data = {"url": redirect_url}
         return Response(data, status=status.HTTP_200_OK)
+
+
+class StripeCheckoutSessionView(APIView):
+    permission_classes = [IsAuthenticated & (IsCustomer | IsGuest)]
+
+    def post(self, request):
+        checkout_session_id = request.data["checkout_session_id"]
+        data = striep_service.get_checkout_session(checkout_session_id)
+        return Response(data=data, status=status.HTTP_200_OK)
+
+
+class StripeCheckoutItemsView(APIView):
+    permission_classes = [IsAuthenticated & (IsCustomer | IsGuest)]
+
+    def post(self, request):
+        checkout_session_id = request.data["checkout_session_id"]
+        data = striep_service.get_checkout_items(checkout_session_id)
+        return Response(data=data, status=status.HTTP_200_OK)

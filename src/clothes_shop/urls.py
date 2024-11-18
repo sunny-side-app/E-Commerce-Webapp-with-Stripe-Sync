@@ -35,9 +35,6 @@ urlpatterns = [
         product_views.ProductDetailView.as_view(),
         name="product-detail",
     ),
-    # Order API URLs
-    path("api/orders/", order_views.OrderListCreateView.as_view(), name="order-list-create"),
-    path("api/orders/<int:pk>/", order_views.OrderDetailView.as_view(), name="order-detail"),
     # Review API URLs
     path(
         "api/reviews/",
@@ -119,9 +116,6 @@ urlpatterns = [
     # Size API URLs
     path("api/sizes/", category_views.SizeListCreateView.as_view(), name="size-list-create"),
     path("api/sizes/<int:pk>/", category_views.SizeDetailView.as_view(), name="size-detail"),
-    # Size API URLs
-    path("api/sizes/", category_views.SizeListCreateView.as_view(), name="size-list-create"),
-    path("api/sizes/<int:pk>/", category_views.SizeDetailView.as_view(), name="size-detail"),
     # Target API URLs
     path("api/targets/", category_views.TargetListCreateView.as_view(), name="target-list-create"),
     path("api/targets/<int:pk>/", category_views.TargetDetailView.as_view(), name="target-detail"),
@@ -143,4 +137,14 @@ urlpatterns = [
     path("api/categories/", category_views.CategoryListView.as_view(), name="category-list"),
     # Stripe Checkout
     path("api/checkout/", checkout_views.StripeCheckoutView.as_view(), name="stripe-checkout"),
+    path(
+        "api/checkout/sessions/",
+        checkout_views.StripeCheckoutSessionView.as_view(),
+        name="stripe-checkout-session",
+    ),
+    path(
+        "api/checkout/sessions/items/",
+        checkout_views.StripeCheckoutItemsView.as_view(),
+        name="stripe-checkout-items",
+    ),
 ]
