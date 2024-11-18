@@ -1,4 +1,5 @@
 import logging
+import stripe
 
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import APIException, NotFound, ValidationError
@@ -15,7 +16,7 @@ from clothes_shop.serializers.user_serializers import (
     UserSerializer,
     UserSignupSerializer,
     ConfirmEmailSerializer,
-    SendConfirmationEmailSerializer
+    ResendConfirmationEmailSerializer
 )
 from clothes_shop.services.stripe_service import CustomerData, StripeService
 from clothes_shop.services.email_service import EmailService
@@ -103,41 +104,70 @@ class UserSignupView(generics.CreateAPIView):
             )
             stripe_customer_id = stripe_service.create_customer(customer_data)
             
-            serializer.save(stripe_customer_id=stripe_customer_id)
+            user = serializer.save(stripe_customer_id=stripe_customer_id)
+
+            try:
+                EmailService.send_email(user, email_type="confirmation")
+            except Exception as e:
+                logger.error(f"確認メール送信失敗: {e}")
+                return Response(
+                        {"error": "確認メールの再送信に失敗しました。"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    ) 
+        except stripe.error.StripeError as e:
+            logger.error(f"Stripeエラー: {e}")
+            raise ValidationError({"error": "Stripeの顧客登録に失敗しました。"})
+
+        except ValidationError as e:
+            logger.error(f"バリデーションエラー: {e}")
+            raise ValidationError({"error": "入力データに不正があります。"})
+
         except Exception as e:
-            api_exception = APIException(detail="Stripeの顧客登録に失敗しました。")
-            api_exception.status_code = 500
-            logger.error(e)
-            raise api_exception
-    
+            logger.error(f"予期しないエラー: {e}")
+            raise ValidationError({"error": "ユーザー登録中にエラーが発生しました。"})
+
     def create(self, request, *args, **kwargs):
         email = request.data.get("email")
 
         existing_user = User.objects.filter(email=email).first()
         if existing_user:
             if not existing_user.is_active:
-                return Response(
-                    {"error": "メール認証が未完了です。メールを再送信したのでメールを確認し、リンクをクリックしてメール認証を完了させてください。"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                try:
+                    EmailService.send_email(existing_user, email_type="confirmation")
+                    return Response(
+                        {"error": "メール認証が未完了です。メールを再送信したのでメールを確認し、リンクをクリックしてメール認証を完了させてください。"},
+                        status=status.HTTP_200_OK,
+                    )
+                except Exception as e:
+                    logger.error(f"確認メール再送信失敗: {e}")
+                    return Response(
+                        {"error": "確認メールの再送信に失敗しました。"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
             else:
                 return Response(
                     {"error": "このメールアドレスは既に登録されています。"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        
-        response = super().create(request, *args, **kwargs)
-        response.data = {
-            "message": "ユーザー登録が成功しました。メールを確認し、リンクをクリックしてメール認証を完了させてください。",
-            "user": response.data,
-        }
-        return response
+        try:
+            response = super().create(request, *args, **kwargs)
+            response.data = {
+                "message": "ユーザー登録が成功しました。メールを確認し、リンクをクリックしてメール認証を完了させてください。",
+                "user": response.data,
+            }
+            return response
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"ユーザー登録時の予期せぬエラー: {e}")
+            return Response(
+                {"error": "ユーザー登録中にエラーが発生しました。"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-class SendConfirmationEmailView(generics.GenericAPIView):
-    """
-    サインアップ後に未認証ユーザーへ確認メールを送信するビュー。
-    """
-    serializer_class = SendConfirmationEmailSerializer
+
+class ResendConfirmationEmailView(generics.GenericAPIView):# サインアップ後に未認証ユーザーへ確認メールを送信するビュー(未使用)
+    serializer_class = ResendConfirmationEmailSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -165,7 +195,7 @@ class SendConfirmationEmailView(generics.GenericAPIView):
 
 token_generator = PasswordResetTokenGenerator()
 
-class CustomConfirmEmailView(generics.GenericAPIView):
+class EmailConfirmationView(generics.GenericAPIView):
     """
     メール認証リンクを処理するビュー。
     """
@@ -187,11 +217,8 @@ class CustomConfirmEmailView(generics.GenericAPIView):
             logger.error(f"ユーザーが見つかりません: uid={uidb64}")
             return Response({"error": "無効なトークンです。"}, status=status.HTTP_404_NOT_FOUND)
 
-        # トークンの検証
         if not token_generator.check_token(user, serializer.validated_data["token"]):
             return Response({"error": "無効なトークンです。"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # ユーザーの有効化処理
         try:
             user.is_active = True
             user.save()

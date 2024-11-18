@@ -85,7 +85,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-class SendConfirmationEmailSerializer(serializers.Serializer):
+class ResendConfirmationEmailSerializer(serializers.Serializer):
     """
     メール確認用のシリアライザ。
     """

@@ -14,7 +14,9 @@ token_generator = PasswordResetTokenGenerator()
 class EmailService:
     @staticmethod
     def send_email(user, email_type="confirmation"):
+        logger.info(f"Sending {email_type} email to {user.email}...")
         try:
+            logger.info(f"メール送信開始: {user.email}, タイプ: {email_type}")
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = token_generator.make_token(user)
 

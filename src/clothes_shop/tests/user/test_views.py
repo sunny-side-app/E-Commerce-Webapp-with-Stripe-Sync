@@ -1,3 +1,5 @@
+import stripe, os
+
 from unittest.mock import patch
 from django.test import override_settings
 from rest_framework.test import APITestCase
@@ -6,7 +8,11 @@ from django.urls import reverse
 from datetime import timedelta, datetime, timezone
 from rest_framework_simplejwt.tokens import AccessToken
 
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+
 from clothes_shop.models.user import User
+from clothes_shop.services.email_service import EmailService
 
 
 class UserAPITests(APITestCase):
@@ -143,7 +149,7 @@ class UserSignupViewTests(APITestCase):
         )
 
         response = self.client.post(self.signup_url, self.user_data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("error", response.data)
         self.assertEqual(response.data["error"], "メール認証が未完了です。メールを再送信したのでメールを確認し、リンクをクリックしてメール認証を完了させてください。")
 
@@ -164,18 +170,62 @@ class UserSignupViewTests(APITestCase):
         self.assertIn("error", response.data)
         self.assertEqual(response.data["error"], "このメールアドレスは既に登録されています。")
 
+    @patch("clothes_shop.services.email_service.EmailService.send_email")
+    @patch("clothes_shop.services.stripe_service.StripeService.create_customer")
+    def test_signup_stripe_failure(self, mock_create_customer, mock_send_email):
+        mock_create_customer.side_effect = stripe.error.StripeError("API Error")
+        mock_send_email.return_value = None 
+
+        response = self.client.post(
+            self.signup_url,
+            data=self.user_data,
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("error", response.data)
+        self.assertEqual(response.data["error"], "Stripeの顧客登録に失敗しました。")
+
+    @patch("clothes_shop.services.email_service.EmailService.send_email")
     @patch("clothes_shop.views.user_views.stripe_service.create_customer")
-    def test_signup_stripe_failure(self, mock_create_customer):
-        mock_create_customer.side_effect = Exception("Stripe API error")
-        url = reverse("clothes_shop:user-signup")
-        signup_data = {
-            "name": "Test User",
-            "email": "testuser@example.com",
-            "password": "securepassword123"
-        }
+    def test_signup_and_email_sent(self, mock_create_customer, mock_send_email):
+        mock_create_customer.return_value = "cus_mocked_id"
+        mock_send_email.return_value = None  # モックでメール送信成功をシミュレート
 
-        response = self.client.post(url, signup_data, format="json")
+        response = self.client.post(self.signup_url, self.user_data, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        self.assertIn("detail", response.data)
-        self.assertEqual(response.data["detail"], "Stripeの顧客登録に失敗しました。")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn("message", response.data)
+        self.assertIn("user", response.data)
+
+        user = User.objects.get(email=self.user_data["email"])
+        self.assertEqual(user.name, self.user_data["name"])
+        self.assertEqual(user.role, "registered")
+        self.assertFalse(user.is_active)
+
+        mock_send_email.assert_called_once_with(user, email_type="confirmation")
+
+    
+    @patch("clothes_shop.services.email_service.EmailService.send_email")
+    def test_email_confirmation_link(self, mock_send_email):
+        mock_send_email.return_value = None  # メール送信の成功をモック
+
+        user = User.objects.create_user(
+            email="testuser@example.com",
+            name="Test User",
+            password="securepassword123",
+            is_active=False,
+        )
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = "test-token"
+
+        base_url = os.getenv("CONFIRMATION_URL", "http://127.0.0.1:8081")
+        expected_link = f"{base_url}/api/signup/account-confirm-email/{uid}/{token}/"
+
+        email_service = EmailService()
+        email_service.send_email(user, email_type="confirmation")
+
+        mock_send_email.assert_called_once()  # 一度だけ呼び出されることを確認
+        args, kwargs = mock_send_email.call_args  # 呼び出し時の引数を確認
+        kwargs["message"] = f"Please click the following link to verify your email: {expected_link}"
+        self.assertIn(expected_link, kwargs["message"])  # メールの本文にリンクが含まれることを確認

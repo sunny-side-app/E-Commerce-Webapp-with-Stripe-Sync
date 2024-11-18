@@ -54,13 +54,13 @@ urlpatterns = [
         name="check_access_and_admin",
     ),
     path(
-        "api/registration/send-confirmation-email/",
-        user_views.SendConfirmationEmailView.as_view(),
-        name="send-confirmation-email",
+        "api/registration/resend-confirmation-email/",
+        user_views.ResendConfirmationEmailView.as_view(),
+        name="resend-confirmation-email",
     ),
     path(
         "api/registration/account-confirm-email/<str:uidb64>/<str:token>/",
-        user_views.CustomConfirmEmailView.as_view(),
+        user_views.EmailConfirmationView.as_view(),
         name="account-confirm-email",
     ),
     # Favorite API URLs
