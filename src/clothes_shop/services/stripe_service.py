@@ -88,19 +88,22 @@ class StripeService:
         stripe.Product.modify(id, active=False)
         return None
 
-    def checkout(self, stripe_customer_id: str, checkout_data_list: list[CheckoutData]) -> str:
+    def checkout(
+        self, stripe_customer_id: str | None, checkout_data_list: list[CheckoutData]
+    ) -> str:
         line_items: list[Any] = []
         for checkout_data in checkout_data_list:
             price_id: str = self.__get_price(checkout_data.stripe_product_id)
             line_items.append({"price": price_id, "quantity": checkout_data.product_amount})
-
-        session = stripe.checkout.Session.create(
-            customer=stripe_customer_id,
-            mode="payment",
-            line_items=line_items,
-            success_url=self.checkout_url_success,
-            cancel_url=self.checkout_url_cancel,
-        )
+        session_params = {
+            "mode": "payment",
+            "line_items": line_items,
+            "success_url": self.checkout_url_success,
+            "cancel_url": self.checkout_url_cancel,
+        }
+        if stripe_customer_id is not None:
+            session_params["customer"] = stripe_customer_id
+        session = stripe.checkout.Session.create(**session_params)
         return session.url
 
     def create_customer(self, customerData: CustomerData) -> str:

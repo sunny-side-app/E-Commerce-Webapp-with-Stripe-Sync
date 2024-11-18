@@ -37,8 +37,10 @@ class StripeCheckoutView(APIView):
             product = get_product(product_id)
             stripe_product_id = product.stripe_product_id
             checkout_data_list.append(CheckoutData(stripe_product_id, amount))
+        role = request.user.role
+        stripe_customer_id = request.user.stripe_customer_id
         redirect_url = striep_service.checkout(
-            stripe_customer_id=request.user.stripe_customer_id,
+            stripe_customer_id=stripe_customer_id if role != "guest" else None,
             checkout_data_list=checkout_data_list,
         )
         data = {"url": redirect_url}

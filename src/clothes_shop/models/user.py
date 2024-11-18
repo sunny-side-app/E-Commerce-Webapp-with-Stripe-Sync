@@ -23,6 +23,11 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_guest(self):
+        user = self.model(email=None, name=None, role="guest")
+        user.save(using=self._db)
+        return
+
     def create_superuser(self, email, name=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
@@ -52,9 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )  # Djangoのデフォルトユーザーモデル(AbstractUser,AbstractBaseUser)で、ユーザーのログイン履歴やアカウント作成日を管理するためにmust
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
     objects = UserManager()
-
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
