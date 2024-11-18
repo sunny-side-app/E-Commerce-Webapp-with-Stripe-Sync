@@ -196,9 +196,6 @@ class ResendConfirmationEmailView(generics.GenericAPIView):# サインアップ�
 token_generator = PasswordResetTokenGenerator()
 
 class EmailConfirmationView(generics.GenericAPIView):
-    """
-    メール認証リンクを処理するビュー。
-    """
     serializer_class = ConfirmEmailSerializer
 
     def get(self, request, uidb64, token, *args, **kwargs):

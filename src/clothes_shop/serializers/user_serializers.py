@@ -86,9 +86,6 @@ class UserSignupSerializer(serializers.ModelSerializer):
         return user
 
 class ResendConfirmationEmailSerializer(serializers.Serializer):
-    """
-    メール確認用のシリアライザ。
-    """
     email = serializers.EmailField()
 
     def validate_email(self, value):
@@ -102,8 +99,5 @@ class ResendConfirmationEmailSerializer(serializers.Serializer):
 
 
 class ConfirmEmailSerializer(serializers.Serializer):
-    """
-    メール認証リンク用のシリアライザ。
-    """
     uidb64 = serializers.CharField()
     token = serializers.CharField()
