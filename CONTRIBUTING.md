@@ -31,6 +31,14 @@ DEMO_USER_COUNT=＜デモユーザーデータ数＞
 AWS_ACCESS_KEY_ID=エクセルファイル参照
 AWS_SECRET_ACCESS_KEY=エクセルファイル参照
 AWS_S3_IMAGE_BUCKET=エクセルファイル参照
+CONFIRMATION_URL=＜確認メールのリンクに使用するベースURL＞ # http://127.0.0.1:8081 など
+EMAIL_HOST=＜SMTPサーバーのホスト名＞ # smtp.gmail.comなど
+EMAIL_PORT=＜SMTPサーバーのポート番号＞ # 587
+EMAIL_USE_TLS=＜TLSを使用する場合はTrue＞
+EMAIL_USE_SSL=＜SSLを使用する場合はTrue＞
+EMAIL_HOST_USER=＜SMTP認証に使用するメールアドレス＞ # Gmailメールアドレスなど
+EMAIL_HOST_PASSWORD=＜SMTP認証に使用するアプリパスワード＞ # Googleアカウントなら設定済み
+DEFAULT_FROM_EMAIL=＜メール送信時のデフォルト送信元アドレス＞ # Gmailメールアドレスなど
 ```
 
 # 開発手順
