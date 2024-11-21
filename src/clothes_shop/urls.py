@@ -70,7 +70,7 @@ urlpatterns = [
         name="wishlist-list-create",
     ),
     path(
-        "api/wishlists/<int:pk>/",
+        "api/wishlists/<int:userId>/",
         wishlist_views.WishListDetailView.as_view(),
         name="wishlist-detail",
     ),

@@ -53,6 +53,7 @@ class WishListListCreateView(APIView):
             WishList.objects.get_or_create(
                 user_id=user_id,
                 product_id=product_id,
+                defaults={"is_public": True},
             )
             return Response(
                 {"message": f"product_id:{product_id}をWishListに追加しました。", "wish": True},
@@ -67,9 +68,19 @@ class WishListListCreateView(APIView):
             )
 
 
-class WishListDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = WishList.objects.all()
-    serializer_class = WishListSerializer
+class WishListDetailView(APIView):
 
-    def get_object(self):
-        return get_object_or_404(WishList, pk=self.kwargs.get("pk"))
+    def get(self, request, *args, **kwargs):
+        user_id = self.kwargs.get("userId")
+        if not user_id:
+            raise NotFound(detail="User ID がありません.")
+
+        wishs = WishList.objects.filter(user_id=user_id, is_public=True)
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginated_products = paginator.paginate_queryset(wishs, request)
+
+        serializer_data = WishListSerializer(paginated_products, many=True).data
+
+        return paginator.get_paginated_response(serializer_data)
