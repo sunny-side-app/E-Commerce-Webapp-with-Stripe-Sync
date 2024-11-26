@@ -197,6 +197,7 @@ token_generator = PasswordResetTokenGenerator()
 
 class EmailConfirmationView(generics.GenericAPIView):
     serializer_class = ConfirmEmailSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, uidb64, token, *args, **kwargs):
         serializer = self.get_serializer(data={"uidb64": uidb64, "token": token})

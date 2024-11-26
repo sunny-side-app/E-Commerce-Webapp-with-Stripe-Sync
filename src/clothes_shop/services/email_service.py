@@ -21,8 +21,8 @@ class EmailService:
             token = token_generator.make_token(user)
 
             if email_type == "confirmation":
-                base_url = os.getenv("CONFIRMATION_URL", "http://127.0.0.1:8081")
-                url = f"{base_url}/api/signup/account-confirm-email/{uid}/{token}/"
+                frontend_base_url = os.getenv("CONFIRMATION_URL", "http://127.0.0.1:3000")
+                url = f"{frontend_base_url}/email-confirmation/{uid}/{token}/"
                 subject = "Confirm your email"
                 message = f"Please click the following link to verify your email: {url}"
             else:
