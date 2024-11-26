@@ -19,7 +19,7 @@ class EmailServiceTests(TestCase):
         )
         self.uid = urlsafe_base64_encode(force_bytes(self.user.pk))
         self.fixed_token = "test-token" 
-        self.base_url = os.getenv("CONFIRMATION_URL", "http://127.0.0.1:8081")
+        self.default_frontend_url = os.getenv("CONFIRMATION_URL", "http://127.0.0.1:3000")
 
     @patch("clothes_shop.services.email_service.send_mail")
     @patch("clothes_shop.services.email_service.token_generator")
@@ -32,7 +32,7 @@ class EmailServiceTests(TestCase):
         expected_subject = "Confirm your email"
         expected_message = (
             f"Please click the following link to verify your email: "
-            f"{self.base_url}/api/signup/account-confirm-email/{self.uid}/{self.fixed_token}/"
+            f"{self.default_frontend_url}/email-confirmation/{self.uid}/{self.fixed_token}/"
         )
         expected_from_email = settings.DEFAULT_FROM_EMAIL
         expected_recipient_list = [self.user.email]
@@ -56,7 +56,7 @@ class EmailServiceTests(TestCase):
         EmailService.send_email(self.user, email_type="confirmation")
 
         expected_url = (
-            f"http://testserver.com/api/signup/account-confirm-email/{self.uid}/{self.fixed_token}/"
+            f"http://testserver.com/email-confirmation/{self.uid}/{self.fixed_token}/"
         )
 
         args, kwargs = mock_send_mail.call_args
