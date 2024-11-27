@@ -54,9 +54,50 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "email",
             "name",
             "password",
-            "role",
-            "is_active",
-            "is_staff",
+            "role", 
+            "is_active", 
+            "is_staff", 
             "address",
-        ]
+            ]
         read_only_fields = ["id", "is_active", "is_staff"]
+
+class UserSignupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["name", "email", "password", "address"]
+        extra_kwargs = {
+            "password": {"write_only": True, "min_length": 8},
+            "name": {"required": True},
+            "email": {"required": True},
+        }
+
+    def create(self, validated_data):
+        user = User(
+            name=validated_data["name"],
+            email=validated_data["email"],
+            address=validated_data.get("address", ""),
+            stripe_customer_id=validated_data.get("stripe_customer_id", ""),
+            role="registered",
+            is_active=False,
+        )
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
+
+class ResendConfirmationEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            user = User.objects.get(email=value)
+            if user.is_active:
+                raise serializers.ValidationError("このユーザーは既に認証されています。")
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("指定されたメールアドレスのユーザーが見つかりません。")
+
+
+class ConfirmEmailSerializer(serializers.Serializer):
+    uidb64 = serializers.CharField()
+    token = serializers.CharField()

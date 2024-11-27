@@ -47,10 +47,21 @@ urlpatterns = [
     path("api/users/", user_views.UserListCreateView.as_view(), name="user-list-create"),
     path("api/users/<int:user_id>/", user_views.UserDetailView.as_view(), name="user-detail"),
     path("api/profile/", user_views.UserProfileView.as_view(), name="user-profile"),
+    path("api/signup/", user_views.UserSignupView.as_view(), name="user-signup"),
     path(
         "api/check-access/",
         check_access_views.CheckAccessAndAdminView.as_view(),
         name="check_access_and_admin",
+    ),
+    path(
+        "api/signup/resend-confirmation-email/",
+        user_views.ResendConfirmationEmailView.as_view(),
+        name="resend-confirmation-email",
+    ),
+    path(
+        "api/signup/account-confirm-email/<str:uidb64>/<str:token>/",
+        user_views.EmailConfirmationView.as_view(),
+        name="account-confirm-email",
     ),
     # Favorite API URLs
     path(
@@ -70,7 +81,7 @@ urlpatterns = [
         name="wishlist-list-create",
     ),
     path(
-        "api/wishlists/<int:pk>/",
+        "api/wishlists/<int:userId>/",
         wishlist_views.WishListDetailView.as_view(),
         name="wishlist-detail",
     ),
