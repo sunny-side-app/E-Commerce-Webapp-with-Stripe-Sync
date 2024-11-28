@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - develop
+      - test-cicd-workflow # 追加: 検証用ブランチでのトリガー
   pull_request:
     branches:
       - develop
+      - test-cicd-workflow # 追加: 検証用ブランチのPRも対象
 
 jobs:
   test:
