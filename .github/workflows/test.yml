@@ -28,12 +28,14 @@ jobs:
         python -m venv venv
         . venv/bin/activate
         pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r src/requirements.txt
 
     - name: Create .env file
-      run: echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+      run: |
+        echo "${{ secrets.ENV_FILE_CONTENT }}" > src/.env
 
     - name: Run Django tests
       run: |
-        . venv/bin/activate
+        cd src
+        . ../venv/bin/activate
         python manage.py test
