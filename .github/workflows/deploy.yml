@@ -1,40 +1,35 @@
-name: CI/CD Pipeline for Django with Docker and AWS
+name: CD - Deploy to Production
 
 on:
   push:
     branches:
-      # - main
-      # - develop
-      - test-cicd-workflow
+      - main
 
 jobs:
-  build-and-push:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+    - name: Create .env file
+      run: echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
 
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }} .
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }}
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-  deploy-production:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }} .
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }}
 
-      - name: Deploy to EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.PRODUCTION_SERVER_IP }} << 'EOF'
+    - name: Deploy to AWS EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.PRODUCTION_SERVER_IP }} << 'EOF'
           docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" -p "${{ secrets.DOCKER_HUB_PASSWORD }}"
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }}
           docker stop ecommerce-web || true
           docker rm ecommerce-web || true
           docker run -d --name ecommerce-web -p 80:8080 --env-file /home/ubuntu/.env ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }}
-          EOF
+        EOF
