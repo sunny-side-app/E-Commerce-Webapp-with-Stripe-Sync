@@ -43,6 +43,17 @@ jobs:
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
         echo "LOGGING_DIR=src/logs" >> .env
         cp .env src/.env
+    
+    - name: Build and start services
+      run: docker-compose up -d
+
+    - name: Wait for MySQL
+      run: |
+        echo "Waiting for MySQL to be ready..."
+        until docker-compose exec db mysqladmin ping -h"db" --silent; do
+          echo "Waiting for database connection..."
+          sleep 5
+        done
 
     - name: Run Django tests
       run: |
