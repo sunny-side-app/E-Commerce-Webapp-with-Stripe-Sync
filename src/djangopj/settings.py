@@ -6,6 +6,7 @@ import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOGGING_DIR = os.getenv("LOGGING_DIR", os.path.join(BASE_DIR, "logs"))
 
 # .envファイルを読み込む
 env = environ.Env()
@@ -99,7 +100,8 @@ LOGGING = {
         "debug_file": {
             "level": "DEBUG",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/debug/debug.log",
+            # "filename": "/django/logs/debug/debug.log",
+            "filename": os.path.join(LOGGING_DIR, "debug/debug.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 30,
@@ -109,7 +111,8 @@ LOGGING = {
         "info_file": {
             "level": "INFO",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/info/info.log",
+            # "filename": "/django/logs/info/info.log",
+            "filename": os.path.join(LOGGING_DIR, "info/info.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 30,
@@ -119,7 +122,8 @@ LOGGING = {
         "warning_file": {
             "level": "WARNING",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/warning/warning.log",
+            # "filename": "/django/logs/warning/warning.log",
+            "filename": os.path.join(LOGGING_DIR, "warning/warning.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 30,
@@ -129,7 +133,8 @@ LOGGING = {
         "error_file": {
             "level": "ERROR",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/error/error.log",
+            # "filename": "/django/logs/error/error.log",
+            "filename": os.path.join(LOGGING_DIR, "error/error.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 30,
@@ -139,7 +144,8 @@ LOGGING = {
         "critical_file": {
             "level": "CRITICAL",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "/django/logs/critical/critical.log",
+            # "filename": "/django/logs/critical/critical.log",
+            "filename": os.path.join(LOGGING_DIR, "critical/critical.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 30,
