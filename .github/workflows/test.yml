@@ -32,11 +32,11 @@ jobs:
     
     - name: Create required directories
       run: |
-        mkdir -p /django/logs/critical
-        mkdir -p /django/logs/error
-        mkdir -p /django/logs/warning
-        mkdir -p /django/logs/info
-        mkdir -p /django/logs/debug
+        mkdir -p src/logs/critical
+        mkdir -p src/logs/error
+        mkdir -p src/logs/warning
+        mkdir -p src/logs/info
+        mkdir -p src/logs/debug
 
     - name: Create .env file
       run: |
