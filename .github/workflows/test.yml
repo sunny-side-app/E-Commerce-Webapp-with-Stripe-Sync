@@ -29,6 +29,14 @@ jobs:
         . venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
+    
+    - name: Create required directories
+      run: |
+        mkdir -p /django/logs/critical
+        mkdir -p /django/logs/error
+        mkdir -p /django/logs/warning
+        mkdir -p /django/logs/info
+        mkdir -p /django/logs/debug
 
     - name: Create .env file
       run: |
