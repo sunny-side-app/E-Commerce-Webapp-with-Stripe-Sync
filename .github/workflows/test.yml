@@ -36,6 +36,7 @@ jobs:
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
         echo "LOGGING_DIR=src/logs" >> .env
         cp .env src/.env
+        cp .env mysql-variables.env
 
     - name: Build and start services
       run: docker-compose up -d
