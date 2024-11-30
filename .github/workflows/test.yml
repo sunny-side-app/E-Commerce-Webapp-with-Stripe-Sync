@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - develop
-      - test-cicd-workflow # 追加: 検証用ブランチでのトリガー
+      - test-cicd-workflow
   pull_request:
     branches:
       - develop
-      - test-cicd-workflow # 追加: 検証用ブランチのPRも対象
+      - test-cicd-workflow
 
 jobs:
   test:
@@ -18,18 +18,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Python environment
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install dependencies
+    - name: Install Docker Compose
       run: |
-        python -m venv venv
-        . venv/bin/activate
-        pip install --upgrade pip
-        pip install -r requirements.txt
-    
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+
     - name: Create required directories
       run: |
         mkdir -p src/logs/critical
@@ -43,7 +36,7 @@ jobs:
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
         echo "LOGGING_DIR=src/logs" >> .env
         cp .env src/.env
-    
+
     - name: Build and start services
       run: docker-compose up -d
 
@@ -54,6 +47,18 @@ jobs:
           echo "Waiting for database connection..."
           sleep 5
         done
+
+    - name: Set up Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        . venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Run Django tests
       run: |
