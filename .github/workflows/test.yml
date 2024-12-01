@@ -52,14 +52,8 @@ jobs:
     - name: Build and start services
       run: docker-compose up -d
 
-    - name: Wait for MySQL
-      run: |
-        echo "Waiting for MySQL to be ready..."
-        docker-compose logs db
-        until docker-compose exec -T db mysqladmin ping -h"db" --silent; do
-          echo "Waiting for database connection..."
-          sleep 5
-        done
+    - name: Verify Services
+      run: docker-compose ps
 
     - name: Set up Python environment
       uses: actions/setup-python@v4
