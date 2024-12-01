@@ -88,9 +88,10 @@ jobs:
 
     - name: Verify MySQL connection
       run: |
-        # Extract MYSQL_USER and MYSQL_PASSWORD from .env
-        MYSQL_USER=$(grep '^MYSQL_USER=' .env | cut -d '=' -f 2)
-        MYSQL_PASSWORD=$(grep '^MYSQL_PASSWORD=' .env | cut -d '=' -f 2)
+        # Load environment variables from .env
+        set -a  # Automatically export all variables
+        source .env
+        set +a
 
         # Verify MySQL connection
         echo "Testing MySQL connection with user $MYSQL_USER..."
