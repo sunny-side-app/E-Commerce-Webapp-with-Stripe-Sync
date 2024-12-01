@@ -86,7 +86,7 @@ jobs:
     # - name: Check network connectivity to MySQL
     #   run: docker-compose exec -T web ping -c 4 db
 
- - name: Verify MySQL connection
+    - name: Verify MySQL connection
       run: |
         # Extract MYSQL_USER and MYSQL_PASSWORD from .env
         MYSQL_USER=$(grep '^MYSQL_USER=' .env | cut -d '=' -f 2)
