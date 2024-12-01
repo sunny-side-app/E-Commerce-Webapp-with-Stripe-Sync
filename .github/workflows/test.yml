@@ -30,6 +30,7 @@ jobs:
         mkdir -p src/logs/warning
         mkdir -p src/logs/info
         mkdir -p src/logs/debug
+        chmod -R 777 src/logs
 
     - name: Create .env file
       run: |
