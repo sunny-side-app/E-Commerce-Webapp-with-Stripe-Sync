@@ -93,7 +93,7 @@ jobs:
         MYSQL_PASSWORD=$(grep '^MYSQL_PASSWORD=' .env | cut -d '=' -f 2)
 
         # Verify MySQL connection
-        docker-compose exec -T db mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "SELECT 1;"
+        docker-compose exec -T db sh -c "mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e 'SELECT 1;'"
         cd src
         . ../venv/bin/activate
         export DJANGO_SETTINGS_MODULE=djangopj.settings
