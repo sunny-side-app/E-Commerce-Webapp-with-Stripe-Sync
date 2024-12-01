@@ -88,14 +88,15 @@ jobs:
         cd src
         . ../venv/bin/activate
         export DJANGO_SETTINGS_MODULE=djangopj.settings
-        python -c "
-    from django.db import connection
-    try:
-        connection.ensure_connection()
-        print('Database connection successful!')
-    except Exception as e:
-        print(f'Database connection failed: {e}')
-    "
+        python -c 
+          "
+          from django.db import connection
+          try:
+              connection.ensure_connection()
+              print('Database connection successful!')
+          except Exception as e:
+              print(f'Database connection failed: {e}')
+          "
 
     - name: Run Django tests
       run: |
