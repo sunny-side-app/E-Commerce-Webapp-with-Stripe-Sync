@@ -51,6 +51,9 @@ jobs:
 
     - name: Build and start services
       run: docker-compose up -d
+    
+    - name: Check MySQL logs
+      run: docker-compose logs db
 
     - name: Verify Services
       run: docker-compose ps

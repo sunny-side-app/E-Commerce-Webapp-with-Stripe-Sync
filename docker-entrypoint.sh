@@ -1,6 +1,6 @@
 #!/bin/bash
 
-/django/wait-for-it.sh db:3306 -t 60
+/django/wait-for-it.sh db:3306 -t 0
 
 if /django/venv/bin/python3 manage.py migrate; then
     echo "Migration done successfully."
