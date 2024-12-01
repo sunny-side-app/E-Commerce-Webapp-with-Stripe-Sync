@@ -87,10 +87,12 @@ jobs:
       run: |
         cd src
         . ../venv/bin/activate
+        export DJANGO_SETTINGS_MODULE=djangopj.settings
         python -c "from django.db import connection; connection.cursor().execute('SELECT 1'); print('Database connection successful!')"
 
     - name: Run Django tests
       run: |
         cd src
         . ../venv/bin/activate
+        export DJANGO_SETTINGS_MODULE=djangopj.settings
         python manage.py test
