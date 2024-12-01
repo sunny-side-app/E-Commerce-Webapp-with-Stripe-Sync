@@ -83,12 +83,12 @@ jobs:
         python manage.py shell -c "from django.conf import settings; print(settings.LOGGING)"
         python manage.py shell -c "import os; print(os.getenv('LOGGING_DIR'))"
 
-    - name: Check network connectivity to MySQL
-      run: docker-compose exec -T web ping -c 4 db
+    # - name: Check network connectivity to MySQL
+    #   run: docker-compose exec -T web ping -c 4 db
 
     - name: Verify Django DB connection
       run: |
-        docker-compose exec db mysql -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1;"
+        docker-compose exec -T db mysql -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1;"
         cd src
         . ../venv/bin/activate
         export DJANGO_SETTINGS_MODULE=djangopj.settings
