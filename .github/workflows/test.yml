@@ -34,6 +34,11 @@ jobs:
         chmod -R 777 src/logs
         ls -l src/logs
 
+    - name: Check log directory permissions
+      run: |
+        ls -ld src/logs
+        ls -lR src/logs
+
     - name: Create .env file
       run: |
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
