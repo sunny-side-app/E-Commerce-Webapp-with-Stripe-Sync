@@ -39,6 +39,9 @@ jobs:
         ls -ld src/logs
         ls -lR src/logs
 
+    - name: Check current user
+      run: whoami
+
     - name: Create .env file
       run: |
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
