@@ -32,7 +32,6 @@ jobs:
         mkdir -p src/logs/debug
         sudo chown -R $USER:$USER src/logs
         chmod -R 777 src/logs
-        ls -l src/logs
 
     - name: Check log directory permissions
       run: |
@@ -71,6 +70,13 @@ jobs:
         . venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
+
+    - name: Check Django logging settings
+      run: |
+        cd src
+        . ../venv/bin/activate
+        python manage.py shell -c "from django.conf import settings; print(settings.LOGGING)"
+        python manage.py shell -c "import os; print(os.getenv('LOGGING_DIR'))"
 
     - name: Run Django tests
       run: |
