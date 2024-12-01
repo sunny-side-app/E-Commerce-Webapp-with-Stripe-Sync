@@ -88,7 +88,12 @@ jobs:
 
     - name: Verify Django DB connection
       run: |
-        docker-compose exec -T db mysql -u${{ secrets.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -e "SELECT 1;"
+        # Extract MYSQL_USER and MYSQL_PASSWORD from .env
+        MYSQL_USER=$(grep '^MYSQL_USER=' .env | cut -d '=' -f 2)
+        MYSQL_PASSWORD=$(grep '^MYSQL_PASSWORD=' .env | cut -d '=' -f 2)
+
+        # Verify MySQL connection
+        docker-compose exec -T db mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "SELECT 1;"
         cd src
         . ../venv/bin/activate
         export DJANGO_SETTINGS_MODULE=djangopj.settings
