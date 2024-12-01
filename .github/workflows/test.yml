@@ -55,6 +55,7 @@ jobs:
     - name: Wait for MySQL
       run: |
         echo "Waiting for MySQL to be ready..."
+        docker-compose logs db
         until docker-compose exec -T db mysqladmin ping -h"db" --silent; do
           echo "Waiting for database connection..."
           sleep 5
