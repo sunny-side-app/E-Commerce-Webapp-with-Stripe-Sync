@@ -93,6 +93,10 @@ jobs:
         source .env
         set +a
 
+        # Debug: Print MySQL-related variables
+        echo "MYSQL_USER: $MYSQL_APP_USER"
+        echo "MYSQL_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+
         # Verify MySQL connection
         echo "Testing MySQL connection with user $MYSQL_USER..."
         docker-compose exec -T db sh -c "mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e 'SELECT 1;'"
