@@ -6,11 +6,12 @@ import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-LOGGING_DIR = os.getenv("LOGGING_DIR", os.path.join(BASE_DIR, "logs"))
+#LOGGING_DIR = os.getenv("LOGGING_DIR", os.path.join(BASE_DIR, "logs"))
 
 # .envファイルを読み込む
 env = environ.Env()
 env.read_env(os.path.join(os.path.dirname(BASE_DIR), ".env"))
+IS_CI_ENV = os.getenv("CI", False)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -70,96 +71,118 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "djangopj.wsgi.application"
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "[{asctime}] {levelname} [{name}:{lineno}] {message}",
-            "style": "{",
+if IS_CI_ENV: # CI環境用の簡略化されたログ設定
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",  # 標準出力にログを送る
+                "formatter": "verbose",
+            },
         },
-    },
-    "filters": {
-        "debug_only": {
-            "()": "clothes_shop.logging_filters.DebugOnlyFilter",
+        "formatters": {
+            "verbose": {
+                "format": "[{asctime}] {levelname} {message}",
+                "style": "{",
+            },
         },
-        "info_only": {
-            "()": "clothes_shop.logging_filters.InfoOnlyFilter",
+        "root": {
+            "handlers": ["console"],
+            "level": "INFO",  # 必要に応じて "DEBUG" に変更
         },
-        "warning_only": {
-            "()": "clothes_shop.logging_filters.WarningOnlyFilter",
+    }
+else:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "[{asctime}] {levelname} [{name}:{lineno}] {message}",
+                "style": "{",
+            },
         },
-        "error_only": {
-            "()": "clothes_shop.logging_filters.ErrorOnlyFilter",
+        "filters": {
+            "debug_only": {
+                "()": "clothes_shop.logging_filters.DebugOnlyFilter",
+            },
+            "info_only": {
+                "()": "clothes_shop.logging_filters.InfoOnlyFilter",
+            },
+            "warning_only": {
+                "()": "clothes_shop.logging_filters.WarningOnlyFilter",
+            },
+            "error_only": {
+                "()": "clothes_shop.logging_filters.ErrorOnlyFilter",
+            },
+            "critical_only": {
+                "()": "clothes_shop.logging_filters.CriticalOnlyFilter",
+            },
         },
-        "critical_only": {
-            "()": "clothes_shop.logging_filters.CriticalOnlyFilter",
+        "handlers": {
+            "debug_file": {
+                "level": "DEBUG",
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "/django/logs/debug/debug.log",
+                # "filename": os.path.join(LOGGING_DIR, "debug/debug.log"),
+                "when": "D",
+                "interval": 1,
+                "backupCount": 30,
+                "formatter": "verbose",
+                "filters": ["debug_only"],
+            },
+            "info_file": {
+                "level": "INFO",
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "/django/logs/info/info.log",
+                # "filename": os.path.join(LOGGING_DIR, "info/info.log"),
+                "when": "D",
+                "interval": 1,
+                "backupCount": 30,
+                "formatter": "verbose",
+                "filters": ["info_only"],
+            },
+            "warning_file": {
+                "level": "WARNING",
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "/django/logs/warning/warning.log",
+                # "filename": os.path.join(LOGGING_DIR, "warning/warning.log"),
+                "when": "D",
+                "interval": 1,
+                "backupCount": 30,
+                "formatter": "verbose",
+                "filters": ["warning_only"],
+            },
+            "error_file": {
+                "level": "ERROR",
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "/django/logs/error/error.log",
+                # "filename": os.path.join(LOGGING_DIR, "error/error.log"),
+                "when": "D",
+                "interval": 1,
+                "backupCount": 30,
+                "formatter": "verbose",
+                "filters": ["error_only"],
+            },
+            "critical_file": {
+                "level": "CRITICAL",
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": "/django/logs/critical/critical.log",
+                # "filename": os.path.join(LOGGING_DIR, "critical/critical.log"),
+                "when": "D",
+                "interval": 1,
+                "backupCount": 30,
+                "formatter": "verbose",
+                "filters": ["critical_only"],
+            },
         },
-    },
-    "handlers": {
-        "debug_file": {
-            "level": "DEBUG",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            # "filename": "/django/logs/debug/debug.log",
-            "filename": os.path.join(LOGGING_DIR, "debug/debug.log"),
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["debug_only"],
+        "loggers": {
+            "": {
+                "handlers": ["debug_file", "info_file", "warning_file", "error_file", "critical_file"],
+                "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            },
         },
-        "info_file": {
-            "level": "INFO",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            # "filename": "/django/logs/info/info.log",
-            "filename": os.path.join(LOGGING_DIR, "info/info.log"),
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["info_only"],
-        },
-        "warning_file": {
-            "level": "WARNING",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            # "filename": "/django/logs/warning/warning.log",
-            "filename": os.path.join(LOGGING_DIR, "warning/warning.log"),
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["warning_only"],
-        },
-        "error_file": {
-            "level": "ERROR",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            # "filename": "/django/logs/error/error.log",
-            "filename": os.path.join(LOGGING_DIR, "error/error.log"),
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["error_only"],
-        },
-        "critical_file": {
-            "level": "CRITICAL",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            # "filename": "/django/logs/critical/critical.log",
-            "filename": os.path.join(LOGGING_DIR, "critical/critical.log"),
-            "when": "D",
-            "interval": 1,
-            "backupCount": 30,
-            "formatter": "verbose",
-            "filters": ["critical_only"],
-        },
-    },
-    "loggers": {
-        "": {
-            "handlers": ["debug_file", "info_file", "warning_file", "error_file", "critical_file"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-        },
-    },
-}
+    }
 
 
 # Database
