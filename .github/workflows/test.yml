@@ -55,8 +55,14 @@ jobs:
     - name: Check MySQL logs
       run: docker-compose logs db
 
-    - name: Verify Services
-      run: docker-compose ps
+    - name: Check MySQL readiness
+      run: |
+        echo "Checking if MySQL is ready for connections..."
+        while ! docker-compose exec -T db mysqladmin ping -h"db" --silent; do
+          echo "Waiting for MySQL to be ready..."
+          sleep 5
+        done
+        echo "MySQL is ready!"
 
     - name: Set up Python environment
       uses: actions/setup-python@v4
@@ -76,6 +82,12 @@ jobs:
         . ../venv/bin/activate
         python manage.py shell -c "from django.conf import settings; print(settings.LOGGING)"
         python manage.py shell -c "import os; print(os.getenv('LOGGING_DIR'))"
+
+    - name: Verify Django DB connection
+      run: |
+        cd src
+        . ../venv/bin/activate
+        python manage.py dbshell -c "SELECT 1;"
 
     - name: Run Django tests
       run: |
