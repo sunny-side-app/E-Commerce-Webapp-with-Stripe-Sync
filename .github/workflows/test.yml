@@ -31,6 +31,8 @@ jobs:
         mkdir -p src/logs/info
         mkdir -p src/logs/debug
         sudo chown -R $USER:$USER src/logs
+        chmod -R 777 src/logs
+        ls -l src/logs
 
     - name: Create .env file
       run: |
