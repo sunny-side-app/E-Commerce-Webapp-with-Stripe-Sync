@@ -87,7 +87,7 @@ jobs:
       run: |
         cd src
         . ../venv/bin/activate
-        python manage.py dbshell -c "SELECT 1;"
+        python -c "from django.db import connection; connection.cursor().execute('SELECT 1'); print('Database connection successful!')"
 
     - name: Run Django tests
       run: |
