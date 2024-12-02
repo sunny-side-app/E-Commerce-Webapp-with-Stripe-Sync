@@ -76,21 +76,30 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Verify Docker network connectivity # ネットワーク確認ステップ
+    - name: Reload .env file
       run: |
-        echo "Testing if 'db' is reachable from 'web' container..."
-        docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
-
-
-    - name: Debug hostname resolution in web container
-      run: |
-        docker-compose exec -T web sh -c "getent hosts db"
+        if [ -f .env ]; then
+          echo "Reloading .env file..."
+          while IFS= read -r line; do
+            if [[ "$line" != \#* && "$line" != "" ]]; then
+              export "$line"
+            fi
+          done < .env
+        else
+          echo ".env file not found."
+          exit 1
+        fi
 
     - name: Debug environment variables
       run: |
         echo "MYSQL_APP_USER: $MYSQL_APP_USER"
         echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
         cat .env
+    
+    - name: Verify Docker network connectivity # ネットワーク確認ステップ
+      run: |
+        echo "Testing if 'db' is reachable from 'web' container..."
+        docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
 
     # - name: Check Django logging settings
     #   run: |
