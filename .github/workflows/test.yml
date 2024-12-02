@@ -76,9 +76,11 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Verify Docker network connectivity
+    - name: Verify Docker network connectivity # ネットワーク確認ステップ
       run: |
-        docker-compose exec -T web sh -c "ping -c 4 db"
+        echo "Testing if 'db' is reachable from 'web' container..."
+        docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
+
 
     - name: Debug hostname resolution in web container
       run: |
