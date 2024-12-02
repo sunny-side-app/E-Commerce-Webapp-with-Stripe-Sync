@@ -125,6 +125,16 @@ jobs:
       run: |
         cd src
         . ../venv/bin/activate
+
+        # 再度 .env をロードして環境変数を仮想環境内に設定
+        if [ -f ../.env ]; then
+          echo "Reloading .env file for Django DB connection..."
+          export $(cat ../.env | xargs)
+        else
+          echo ".env file not found."
+          exit 1
+        fi
+        
         export DJANGO_SETTINGS_MODULE=djangopj.settings
         python <<EOF
         from django.db import connection
@@ -139,5 +149,15 @@ jobs:
       run: |
         cd src
         . ../venv/bin/activate
+
+        # 再度 .env をロードして環境変数を仮想環境内に設定
+        if [ -f ../.env ]; then
+          echo "Reloading .env file for Django tests..."
+          export $(cat ../.env | xargs)
+        else
+          echo ".env file not found."
+          exit 1
+        fi
+
         export DJANGO_SETTINGS_MODULE=djangopj.settings
         python manage.py test
