@@ -126,8 +126,16 @@ jobs:
         cd src
         . ../venv/bin/activate
 
-        # 仮想環境に環境変数を引き継ぐ
-        export $(cat ../.env | xargs)
+        # 仮想環境内で環境変数を再読み込み
+        if [ -f ../.env ]; then
+          echo "Reloading .env file for Django DB connection inside virtual environment..."
+          set -o allexport
+          source ../.env
+          set +o allexport
+        else
+          echo ".env file not found."
+          exit 1
+        fi
         
         export DJANGO_SETTINGS_MODULE=djangopj.settings
         python <<EOF
@@ -138,18 +146,22 @@ jobs:
         except Exception as e:
             print("Database connection failed: {}".format(e))
         EOF
-      env: 
-        $(cat ../.env | xargs)  # 必要に応じて GITHUB_ENV から直接読み込む
 
     - name: Run Django tests
       run: |
         cd src
         . ../venv/bin/activate
 
-        # 仮想環境に環境変数を引き継ぐ
-        export $(cat ../.env | xargs)
+        # 仮想環境内で環境変数を再読み込み
+        if [ -f ../.env ]; then
+          echo "Reloading .env file for Django DB connection inside virtual environment..."
+          set -o allexport
+          source ../.env
+          set +o allexport
+        else
+          echo ".env file not found."
+          exit 1
+        fi
 
         export DJANGO_SETTINGS_MODULE=djangopj.settings
         python manage.py test
-      env: 
-        $(cat ../.env | xargs)  # 必要に応じて GITHUB_ENV から直接読み込む
