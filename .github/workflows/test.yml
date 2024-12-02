@@ -129,7 +129,12 @@ jobs:
         # 再度 .env をロードして環境変数を仮想環境内に設定
         if [ -f ../.env ]; then
           echo "Reloading .env file for Django DB connection..."
-          export $(cat ../.env | xargs)
+          while IFS='=' read -r key value; do
+            if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
+              export "$key"="$value"
+            fi
+          done < ../.env
+
         else
           echo ".env file not found."
           exit 1
@@ -153,7 +158,12 @@ jobs:
         # 再度 .env をロードして環境変数を仮想環境内に設定
         if [ -f ../.env ]; then
           echo "Reloading .env file for Django tests..."
-          export $(cat ../.env | xargs)
+          while IFS='=' read -r key value; do
+            if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
+              export "$key"="$value"
+            fi
+          done < ../.env
+
         else
           echo ".env file not found."
           exit 1
