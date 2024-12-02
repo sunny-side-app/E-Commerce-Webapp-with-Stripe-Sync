@@ -88,11 +88,6 @@ jobs:
 
     - name: Verify MySQL connection
       run: |
-        # Load environment variables from .env
-        set -a  # Automatically export all variables
-        source .env
-        set +a
-
         # Debug: Print MySQL-related variables
         echo "MYSQL_USER: $MYSQL_APP_USER"
         echo "MYSQL_PASSWORD: $MYSQL_APP_USER_PASSWORD"
