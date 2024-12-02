@@ -88,9 +88,21 @@ jobs:
 
     - name: Verify MySQL connection
       run: |
+        # 手動で環境変数を設定してみる
+        export MYSQL_APP_USER="app_user"
+        export MYSQL_APP_USER_PASSWORD="app_user_password"
+
+        # 再度デバッグ
+        echo "MYSQL_APP_USER (manual): $MYSQL_APP_USER"
+        echo "MYSQL_APP_USER_PASSWORD (manual): $MYSQL_APP_USER_PASSWORD"
+
         # Debug: Print MySQL-related variables
-        echo "MYSQL_USER: $MYSQL_APP_USER"
+        echo "MYSQL_APP_USER: $MYSQL_APP_USER"
         echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+
+        # Debug: Print the content of .env to confirm it is loaded correctly
+        echo "Debugging .env content:"
+        cat .env
 
         # Verify MySQL connection
         echo "Testing MySQL connection with user $MYSQL_USER..."
