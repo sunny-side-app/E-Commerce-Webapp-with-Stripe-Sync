@@ -90,11 +90,11 @@ jobs:
       run: |
         # Debug: Print MySQL-related variables
         echo "MYSQL_USER: $MYSQL_APP_USER"
-        echo "MYSQL_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+        echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
 
         # Verify MySQL connection
         echo "Testing MySQL connection with user $MYSQL_USER..."
-        docker-compose exec -T db sh -c "mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e 'SELECT 1;'"
+        docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
 
     - name: Verify Django DB connection
       run: |
