@@ -90,11 +90,12 @@ jobs:
           exit 1
         fi
 
-    - name: Debug environment variables
-      run: |
         echo "MYSQL_APP_USER: $MYSQL_APP_USER"
         echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
-        cat .env
+        
+        # Verify MySQL connection
+        echo "Testing MySQL connection with user $MYSQL_APP_USER..."
+        docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
     
     - name: Verify Docker network connectivity # ネットワーク確認ステップ
       run: |
