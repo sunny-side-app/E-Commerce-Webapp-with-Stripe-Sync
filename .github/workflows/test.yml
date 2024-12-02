@@ -75,30 +75,30 @@ jobs:
         . venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
-
-    - name: Check Django logging settings
+    
+    - name: Verify Docker network connectivity
       run: |
-        cd src
-        . ../venv/bin/activate
-        python manage.py shell -c "from django.conf import settings; print(settings.LOGGING)"
-        python manage.py shell -c "import os; print(os.getenv('LOGGING_DIR'))"
+        docker-compose exec -T web sh -c "ping -c 4 db"
+
+    - name: Debug hostname resolution in web container
+      run: |
+        docker-compose exec -T web sh -c "getent hosts db"
+
+    - name: Debug environment variables
+      run: |
+        echo "MYSQL_APP_USER: $MYSQL_APP_USER"
+        echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+        cat .env
+
+    # - name: Check Django logging settings
+    #   run: |
+    #     cd src
+    #     . ../venv/bin/activate
+    #     python manage.py shell -c "from django.conf import settings; print(settings.LOGGING)"
+    #     python manage.py shell -c "import os; print(os.getenv('LOGGING_DIR'))"
 
     - name: Verify MySQL connection
       run: |
-        # .env ファイルを明示的に読み込む
-        if [ -f .env ]; then
-          echo "Loading .env file..."
-          while IFS= read -r line; do
-            # コメント行や空行を無視
-            if [[ "$line" != \#* && "$line" != "" ]]; then
-              export "$line"
-            fi
-          done < .env
-        else
-          echo ".env file not found."
-          exit 1
-        fi
-
         # Verify MySQL connection
         echo "Testing MySQL connection with user $MYSQL_APP_USER..."
         docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
