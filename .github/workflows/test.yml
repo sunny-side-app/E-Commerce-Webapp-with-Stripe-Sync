@@ -83,6 +83,7 @@ jobs:
           while IFS= read -r line; do
             if [[ "$line" != \#* && "$line" != "" ]]; then
               export "$line"
+              echo "$line" >> $GITHUB_ENV
             fi
           done < .env
         else
@@ -97,6 +98,11 @@ jobs:
         echo "Testing MySQL connection with user $MYSQL_APP_USER..."
         docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
     
+    - name: Debug environment variables # 共有されている環境変数を確認
+      run: |
+        echo "MYSQL_APP_USER: $MYSQL_APP_USER"
+        echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+
     - name: Verify Docker network connectivity # ネットワーク確認ステップ
       run: |
         echo "Testing if 'db' is reachable from 'web' container..."
