@@ -126,12 +126,15 @@ jobs:
         cd src
         . ../venv/bin/activate
 
-        # 仮想環境内で環境変数を再読み込み
+         # .envファイルを仮想環境内で再読み込み
         if [ -f ../.env ]; then
           echo "Reloading .env file for Django DB connection inside virtual environment..."
-          set -o allexport
-          source ../.env
-          set +o allexport
+          while IFS='=' read -r key value; do
+            # 空行やコメントを無視
+            if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
+              export "$key=$value"
+            fi
+          done < ../.env
         else
           echo ".env file not found."
           exit 1
