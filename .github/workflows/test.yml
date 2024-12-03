@@ -121,7 +121,10 @@ jobs:
         echo "Testing MySQL connection with user $MYSQL_APP_USER..."
         docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
 
-    - name: Verify Django DB connection
+    - name: Check MySQL container status
+      run: docker ps -a
+
+    - name: Test MySQL connection from Django
       run: |
         cd src
         . ../venv/bin/activate
@@ -152,14 +155,29 @@ jobs:
 
         export DJANGO_SETTINGS_MODULE=djangopj.settings
 
+        # python <<EOF
+        # from django.db import connection
+        # try:
+        #     with connection.cursor() as cursor:
+        #         cursor.execute("CREATE DATABASE test_clothes_shop_db;")
+        #         print("Test database created successfully!")
+        # except Exception as e:
+        #     print(f"Failed to create test database: {e}")
+        # EOF
+
         python <<EOF
-        from django.db import connection
+        import MySQLdb
         try:
-            with connection.cursor() as cursor:
-                cursor.execute("CREATE DATABASE test_clothes_shop_db;")
-                print("Test database created successfully!")
+            connection = MySQLdb.connect(
+                host="db",
+                user="app_user",
+                passwd="app_user_password",
+                db="clothes_shop_db"
+            )
+            print("Direct MySQL connection from Django successful!")
+            connection.close()
         except Exception as e:
-            print(f"Failed to create test database: {e}")
+            print(f"Direct MySQL connection from Django failed: {e}")
         EOF
 
     - name: Run Django tests
