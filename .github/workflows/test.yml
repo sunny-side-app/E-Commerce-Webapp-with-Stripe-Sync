@@ -121,9 +121,6 @@ jobs:
         echo "Testing MySQL connection with user $MYSQL_APP_USER..."
         docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
 
-    - name: Check MySQL container status
-      run: docker ps -a
-
     - name: Test MySQL connection from Django
       run: |
         cd src
@@ -142,7 +139,6 @@ jobs:
           echo ".env file not found."
           exit 1
         fi
-        
         
         # python <<EOF
         # from django.db import connection
@@ -165,65 +161,70 @@ jobs:
         #     print(f"Failed to create test database: {e}")
         # EOF
 
-        python <<EOF
-        import MySQLdb
-        try:
-            connection = MySQLdb.connect(
-                host="db",
-                user="app_user",
-                passwd="app_user_password",
-                db="clothes_shop_db"
-            )
-            print("Direct MySQL connection from Django successful!")
-            connection.close()
-        except Exception as e:
-            print(f"Direct MySQL connection from Django failed: {e}")
-        EOF
-
-    - name: Run Django tests
+        # python <<EOF
+        # import MySQLdb
+        # try:
+        #     connection = MySQLdb.connect(
+        #         host="db",
+        #         user="app_user",
+        #         passwd="app_user_password",
+        #         db="clothes_shop_db"
+        #     )
+        #     print("Direct MySQL connection from Django successful!")
+        #     connection.close()
+        # except Exception as e:
+        #     print(f"Direct MySQL connection from Django failed: {e}")
+        # EOF
+    
+    - name: Run Django tests inside Docker
       run: |
-        cd src
-        . ../venv/bin/activate
+        docker-compose exec web bash -c "
+          source /django/venv/bin/activate && python3 manage.py test"
 
-        # .envファイルを仮想環境内で再読み込み
-        if [ -f ../.env ]; then
-          echo "Reloading .env file for Django DB connection inside virtual environment..."
-          while IFS='=' read -r key value; do
-            # 空行やコメントを無視
-            if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
-              export "$key=$value"
-            fi
-          done < ../.env
-        else
-          echo ".env file not found."
-          exit 1
-        fi
+    # - name: Run Django tests
+    #   run: |
+    #     cd src
+    #     . ../venv/bin/activate
 
-        # Dockerネットワークの確認
-        echo "Verifying Docker network connectivity..."
-        docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
+    #     # .envファイルを仮想環境内で再読み込み
+    #     if [ -f ../.env ]; then
+    #       echo "Reloading .env file for Django DB connection inside virtual environment..."
+    #       while IFS='=' read -r key value; do
+    #         # 空行やコメントを無視
+    #         if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
+    #           export "$key=$value"
+    #         fi
+    #       done < ../.env
+    #     else
+    #       echo ".env file not found."
+    #       exit 1
+    #     fi
 
-        # MySQLが起動するまで待機
-        echo "Waiting for MySQL to be ready..."
-        until docker-compose exec -T db sh -c "mysqladmin ping -h'$MYSQL_HOST' --silent"; do
-          echo "Waiting for MySQL..."
-          sleep 5
-        done
-        echo "MySQL is ready!"
+    #     # Dockerネットワークの確認
+    #     echo "Verifying Docker network connectivity..."
+    #     docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
 
-        echo "MYSQL_HOST: $MYSQL_HOST"
-        echo "MYSQL_PORT: $MYSQL_PORT"
-        echo "MYSQL_APP_USER: $MYSQL_APP_USER"
-        echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
-        echo "MYSQL_DB_NAME: $MYSQL_DB_NAME"
-        echo "MYSQL_TEST_DB_NAME: $MYSQL_TEST_DB_NAME"
-        echo "DATABASE_ENGINE: $DATABASE_ENGINE"
-        echo "EMAIL_HOST: $EMAIL_HOST"
-        echo "EMAIL_HOST_USER: $EMAIL_HOST_USER"
+    #     # MySQLが起動するまで待機
+    #     echo "Waiting for MySQL to be ready..."
+    #     until docker-compose exec -T db sh -c "mysqladmin ping -h'$MYSQL_HOST' --silent"; do
+    #       echo "Waiting for MySQL..."
+    #       sleep 5
+    #     done
+    #     echo "MySQL is ready!"
 
-        export DJANGO_SETTINGS_MODULE=djangopj.settings
+    #     echo "MYSQL_HOST: $MYSQL_HOST"
+    #     echo "MYSQL_PORT: $MYSQL_PORT"
+    #     echo "MYSQL_APP_USER: $MYSQL_APP_USER"
+    #     echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+    #     echo "MYSQL_DB_NAME: $MYSQL_DB_NAME"
+    #     echo "MYSQL_TEST_DB_NAME: $MYSQL_TEST_DB_NAME"
+    #     echo "DATABASE_ENGINE: $DATABASE_ENGINE"
+    #     echo "EMAIL_HOST: $EMAIL_HOST"
+    #     echo "EMAIL_HOST_USER: $EMAIL_HOST_USER"
 
-        # DjangoのDATABASES設定を確認
-        python manage.py shell -c "from django.conf import settings; print(settings.DATABASES)"
+    #     export DJANGO_SETTINGS_MODULE=djangopj.settings
 
-        python manage.py test
+    #     # DjangoのDATABASES設定を確認
+    #     python manage.py shell -c "from django.conf import settings; print(settings.DATABASES)"
+
+    #     python manage.py test
