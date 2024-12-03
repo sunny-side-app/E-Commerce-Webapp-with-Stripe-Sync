@@ -173,5 +173,27 @@ jobs:
         echo "Verifying Docker network connectivity..."
         docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
 
+        # MySQLが起動するまで待機
+        echo "Waiting for MySQL to be ready..."
+        until docker-compose exec -T db sh -c "mysqladmin ping -h'$MYSQL_HOST' --silent"; do
+          echo "Waiting for MySQL..."
+          sleep 5
+        done
+        echo "MySQL is ready!"
+
+        echo "MYSQL_HOST: $MYSQL_HOST"
+        echo "MYSQL_PORT: $MYSQL_PORT"
+        echo "MYSQL_APP_USER: $MYSQL_APP_USER"
+        echo "MYSQL_APP_USER_PASSWORD: $MYSQL_APP_USER_PASSWORD"
+        echo "MYSQL_DB_NAME: $MYSQL_DB_NAME"
+        echo "MYSQL_TEST_DB_NAME: $MYSQL_TEST_DB_NAME"
+        echo "DATABASE_ENGINE: $DATABASE_ENGINE"
+        echo "EMAIL_HOST: $EMAIL_HOST"
+        echo "EMAIL_HOST_USER: $EMAIL_HOST_USER"
+
         export DJANGO_SETTINGS_MODULE=djangopj.settings
+
+        # DjangoのDATABASES設定を確認
+        python manage.py shell -c "from django.conf import settings; print(settings.DATABASES)"
+
         python manage.py test
