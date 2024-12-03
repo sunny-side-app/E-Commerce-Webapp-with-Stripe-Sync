@@ -140,14 +140,24 @@ jobs:
           exit 1
         fi
         
-        export DJANGO_SETTINGS_MODULE=djangopj.settings
+        # export DJANGO_SETTINGS_MODULE=djangopj.settings
+        # python <<EOF
+        # from django.db import connection
+        # try:
+        #     connection.ensure_connection()
+        #     print("Database connection successful!")
+        # except Exception as e:
+        #     print("Database connection failed: {}".format(e))
+        # EOF
+
         python <<EOF
         from django.db import connection
         try:
-            connection.ensure_connection()
-            print("Database connection successful!")
+            with connection.cursor() as cursor:
+                cursor.execute("CREATE DATABASE test_clothes_shop_db;")
+                print("Test database created successfully!")
         except Exception as e:
-            print("Database connection failed: {}".format(e))
+            print(f"Failed to create test database: {e}")
         EOF
 
     - name: Run Django tests
