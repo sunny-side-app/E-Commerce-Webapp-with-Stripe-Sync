@@ -169,5 +169,9 @@ jobs:
           exit 1
         fi
 
+        # Dockerネットワークの確認
+        echo "Verifying Docker network connectivity..."
+        docker-compose exec -T web sh -c "getent hosts db || echo 'Failed to resolve db'"
+
         export DJANGO_SETTINGS_MODULE=djangopj.settings
         python manage.py test
