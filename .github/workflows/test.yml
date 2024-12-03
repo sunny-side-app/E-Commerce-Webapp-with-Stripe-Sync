@@ -121,61 +121,66 @@ jobs:
         echo "Testing MySQL connection with user $MYSQL_APP_USER..."
         docker-compose exec -T db sh -c "mysql -u$MYSQL_APP_USER -p$MYSQL_APP_USER_PASSWORD -e 'SELECT 1;'"
 
-    - name: Test MySQL connection from Django
-      run: |
-        cd src
-        . ../venv/bin/activate
+    # - name: Test MySQL connection from Django
+    #   run: |
+    #     cd src
+    #     . ../venv/bin/activate
 
-        # .envファイルを仮想環境内で再読み込み
-        if [ -f ../.env ]; then
-          echo "Reloading .env file for Django DB connection inside virtual environment..."
-          while IFS='=' read -r key value; do
-            # 空行やコメントを無視
-            if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
-              export "$key=$value"
-            fi
-          done < ../.env
-        else
-          echo ".env file not found."
-          exit 1
-        fi
+    #     # .envファイルを仮想環境内で再読み込み
+    #     if [ -f ../.env ]; then
+    #       echo "Reloading .env file for Django DB connection inside virtual environment..."
+    #       while IFS='=' read -r key value; do
+    #         # 空行やコメントを無視
+    #         if [[ ! $key =~ ^# ]] && [[ $key != "" ]]; then
+    #           export "$key=$value"
+    #         fi
+    #       done < ../.env
+    #     else
+    #       echo ".env file not found."
+    #       exit 1
+    #     fi
         
-        # python <<EOF
-        # from django.db import connection
-        # try:
-        #     connection.ensure_connection()
-        #     print("Database connection successful!")
-        # except Exception as e:
-        #     print("Database connection failed: {}".format(e))
-        # EOF
+    #     # python <<EOF
+    #     # from django.db import connection
+    #     # try:
+    #     #     connection.ensure_connection()
+    #     #     print("Database connection successful!")
+    #     # except Exception as e:
+    #     #     print("Database connection failed: {}".format(e))
+    #     # EOF
 
-        export DJANGO_SETTINGS_MODULE=djangopj.settings
+    #     export DJANGO_SETTINGS_MODULE=djangopj.settings
 
-        # python <<EOF
-        # from django.db import connection
-        # try:
-        #     with connection.cursor() as cursor:
-        #         cursor.execute("CREATE DATABASE test_clothes_shop_db;")
-        #         print("Test database created successfully!")
-        # except Exception as e:
-        #     print(f"Failed to create test database: {e}")
-        # EOF
+    #     # python <<EOF
+    #     # from django.db import connection
+    #     # try:
+    #     #     with connection.cursor() as cursor:
+    #     #         cursor.execute("CREATE DATABASE test_clothes_shop_db;")
+    #     #         print("Test database created successfully!")
+    #     # except Exception as e:
+    #     #     print(f"Failed to create test database: {e}")
+    #     # EOF
 
-        # python <<EOF
-        # import MySQLdb
-        # try:
-        #     connection = MySQLdb.connect(
-        #         host="db",
-        #         user="app_user",
-        #         passwd="app_user_password",
-        #         db="clothes_shop_db"
-        #     )
-        #     print("Direct MySQL connection from Django successful!")
-        #     connection.close()
-        # except Exception as e:
-        #     print(f"Direct MySQL connection from Django failed: {e}")
-        # EOF
-    
+    #     # python <<EOF
+    #     # import MySQLdb
+    #     # try:
+    #     #     connection = MySQLdb.connect(
+    #     #         host="db",
+    #     #         user="app_user",
+    #     #         passwd="app_user_password",
+    #     #         db="clothes_shop_db"
+    #     #     )
+    #     #     print("Direct MySQL connection from Django successful!")
+    #     #     connection.close()
+    #     # except Exception as e:
+    #     #     print(f"Direct MySQL connection from Django failed: {e}")
+    #     # EOF
+    - name: Grant MySQL privileges for app_user
+      run: |
+        docker-compose exec -T db mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "
+        GRANT ALL PRIVILEGES ON *.* TO 'app_user'@'%';
+        FLUSH PRIVILEGES;"
+
     - name: Run Django tests inside Docker
       run: |
         docker-compose exec -T web bash -c "
