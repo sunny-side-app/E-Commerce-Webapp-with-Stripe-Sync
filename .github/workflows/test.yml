@@ -140,7 +140,7 @@ jobs:
           exit 1
         fi
         
-        # export DJANGO_SETTINGS_MODULE=djangopj.settings
+        
         # python <<EOF
         # from django.db import connection
         # try:
@@ -149,6 +149,8 @@ jobs:
         # except Exception as e:
         #     print("Database connection failed: {}".format(e))
         # EOF
+
+        export DJANGO_SETTINGS_MODULE=djangopj.settings
 
         python <<EOF
         from django.db import connection
