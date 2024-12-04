@@ -92,7 +92,15 @@ jobs:
             GRANT ALL PRIVILEGES ON *.* TO '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\''; 
             FLUSH PRIVILEGES;'
         "
-      
+
+    - name: Verify MySQL user and permissions
+      run: |
+        docker-compose exec -T db sh -c "
+          MYSQL_PWD='${{ secrets.MYSQL_ROOT_PASSWORD }}' mysql -u root -e '
+          SELECT user, host FROM mysql.user;
+          SHOW GRANTS FOR '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\'';'
+        "
+
     - name: Verify MySQL connection from web container
       run: |
         docker-compose exec -T web bash -c "
