@@ -33,13 +33,29 @@ jobs:
         sudo chown -R $USER:$USER src/logs
         chmod -R 777 src/logs
 
+    # - name: Create .env file
+    #   run: |
+    #     echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+    #     echo "LOGGING_DIR=src/logs" >> .env
+    #     echo "CI=true" >> .env
+    #     cp .env src/.env
+    #     cp .env mysql-variables.env
+    - name: Create mysql-variables.env file
+      run: |
+        echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > mysql-variables.env
+        echo "MYSQL_APP_USER=${{ secrets.MYSQL_APP_USER }}" >> mysql-variables.env
+        echo "MYSQL_APP_USER_PASSWORD=${{ secrets.MYSQL_APP_USER_PASSWORD }}" >> mysql-variables.env
+    
     - name: Create .env file
       run: |
-        echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
-        echo "LOGGING_DIR=src/logs" >> .env
+        echo "LOGGING_DIR=src/logs" > .env
         echo "CI=true" >> .env
-        cp .env src/.env
-        cp .env mysql-variables.env
+        echo "MYSQL_HOST=db" >> .env
+        echo "MYSQL_PORT=3306" >> .env
+        echo "MYSQL_DB_NAME=${{ secrets.MYSQL_DB_NAME }}" >> .env
+        echo "MYSQL_TEST_DB_NAME=${{ secrets.MYSQL_TEST_DB_NAME }}" >> .env
+        echo "MYSQL_APP_USER=${{ secrets.MYSQL_APP_USER }}" >> .env
+        echo "MYSQL_APP_USER_PASSWORD=${{ secrets.MYSQL_APP_USER_PASSWORD }}" >> .env
 
     - name: Build and start services
       run: docker-compose up -d
@@ -68,21 +84,6 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    # - name: Grant MySQL privileges for app_user
-    #   run: |
-    #     source .env &&
-    #     docker-compose exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" db sh -c "
-    #       mysql -u root -e '
-    #         GRANT ALL PRIVILEGES ON *.* TO '\''$MYSQL_APP_USER'\''@'\''%'\''; 
-    #         FLUSH PRIVILEGES;'
-    #     "
-
-    # - name: Run Django tests inside Docker
-    #   run: |
-    #     source .env &&
-    #     docker-compose exec -T -e MYSQL_PWD="$MYSQL_APP_USER_PASSWORD" web bash -c "
-    #       source /django/venv/bin/activate && python3 manage.py test
-    #     "
     - name: Grant MySQL privileges for app_user
       run: |
         docker-compose exec -T db sh -c "
