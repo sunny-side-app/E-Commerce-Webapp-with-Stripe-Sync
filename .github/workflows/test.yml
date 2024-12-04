@@ -54,6 +54,7 @@ jobs:
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
         echo "LOGGING_DIR=src/logs" >> .env
         echo "CI=true" >> .env
+        cp .env src/.env
         cp .env mysql-variables.env
 
     - name: Build and start services
@@ -82,6 +83,21 @@ jobs:
         . venv/bin/activate
         pip install --upgrade pip
         pip install -r requirements.txt
+    
+    - name: Reload .env file
+      run: |
+        if [ -f .env ]; then
+          echo "Reloading .env file..."
+          while IFS= read -r line; do
+            if [[ "$line" != \#* && "$line" != "" ]]; then
+              export "$line"
+              echo "$line" >> $GITHUB_ENV
+            fi
+          done < .env
+        else
+          echo ".env file not found."
+          exit 1
+        fi
     
     - name: Grant MySQL privileges for app_user
       run: |
