@@ -101,12 +101,10 @@ jobs:
     
     - name: Grant MySQL privileges for app_user
       run: |
-        docker-compose exec -T db sh -c "
+        docker-compose exec db sh -c "
           MYSQL_PWD='${{ secrets.MYSQL_ROOT_PASSWORD }}' mysql -u root -e '
-          DROP USER IF EXISTS '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\''; 
-          CREATE USER '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\'' IDENTIFIED BY '\''${{ secrets.MYSQL_APP_USER_PASSWORD }}'\''; 
-          GRANT ALL PRIVILEGES ON *.* TO '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\''; 
-          FLUSH PRIVILEGES;'
+            GRANT ALL PRIVILEGES ON *.* TO '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\''; 
+            FLUSH PRIVILEGES;'
         "
       
     - name: Verify MySQL connection from web container
