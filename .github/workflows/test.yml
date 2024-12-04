@@ -111,7 +111,7 @@ jobs:
 
     - name: Run Django tests inside Docker
       run: |
-        source .env &&
-        docker-compose exec -T -e MYSQL_PWD='${{ secrets.MYSQL_APP_USER_PASSWORD }}' web bash -c "
-          source /django/venv/bin/activate && python3 manage.py test
+        docker-compose exec -T web bash -c "
+          source /django/venv/bin/activate &&
+          MYSQL_PWD='${{ secrets.MYSQL_APP_USER_PASSWORD }}' python3 manage.py test
         "
