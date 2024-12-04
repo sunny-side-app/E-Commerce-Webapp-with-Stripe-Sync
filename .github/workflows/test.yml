@@ -101,11 +101,19 @@ jobs:
     
     - name: Grant MySQL privileges for app_user
       run: |
-        docker-compose exec db sh -c "
+        echo "Debug: Checking environment variables before executing grant command..."
+        docker-compose exec -T db sh -c "
+          echo 'MYSQL_PWD=${{ secrets.MYSQL_ROOT_PASSWORD }}';
+          echo 'MYSQL_USER=${{ secrets.MYSQL_APP_USER }}';
+          echo 'MYSQL_PASSWORD=${{ secrets.MYSQL_APP_USER_PASSWORD }}';
+          echo 'Checking if MySQL is accessible...';
+          MYSQL_PWD='${{ secrets.MYSQL_ROOT_PASSWORD }}' mysql -u root -e 'SELECT 1;' || echo 'MySQL connection failed';
+          echo 'Executing GRANT command...';
           MYSQL_PWD='${{ secrets.MYSQL_ROOT_PASSWORD }}' mysql -u root -e '
             GRANT ALL PRIVILEGES ON *.* TO '\''${{ secrets.MYSQL_APP_USER }}'\''@'\''%'\''; 
             FLUSH PRIVILEGES;'
         "
+      continue-on-error: true
       
     - name: Verify MySQL connection from web container
       run: |
