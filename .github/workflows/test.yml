@@ -33,6 +33,19 @@ jobs:
         sudo chown -R $USER:$USER src/logs
         chmod -R 777 src/logs
 
+    - name: Create mysql-variables.env file
+      run: |
+        echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > mysql-variables.env
+        echo "MYSQL_APP_USER=${{ secrets.MYSQL_APP_USER }}" >> mysql-variables.env
+        echo "MYSQL_APP_USER_PASSWORD=${{ secrets.MYSQL_APP_USER_PASSWORD }}" >> mysql-variables.env
+        echo "MYSQL_DB_NAME=${{ secrets.MYSQL_DB_NAME }}" >> mysql-variables.env
+        echo "MYSQL_TEST_DB_NAME=${{ secrets.MYSQL_TEST_DB_NAME }}" >> mysql-variables.env
+    
+    - name: Create .env file
+      run: |
+        echo "LOGGING_DIR=src/logs" > .env
+        echo "CI=true" >> .env
+
     - name: Build and start services
       run: docker-compose up -d
     
