@@ -5,10 +5,10 @@ on:
     branches:
       - develop
       - test-cicd-workflow
-  pull_request:
-    branches:
-      - develop
-      - test-cicd-workflow
+  # pull_request:
+  #   branches:
+  #     - develop
+  #     - test-cicd-workflow
 
 jobs:
   test:

@@ -9,8 +9,6 @@ services:
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
     ports:
       - "13306:3306"
-    networks:
-      - app-network
 
   web:
     build: .
@@ -21,8 +19,3 @@ services:
       - "8081:8080"
     depends_on:
       - db
-    networks:
-      - app-network
-
-networks:
-  app-network:
