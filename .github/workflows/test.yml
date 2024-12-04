@@ -38,8 +38,8 @@ jobs:
         echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
         echo "LOGGING_DIR=src/logs" >> .env
         echo "CI=true" >> .env
-      # cp .env src/.env
         cp .env mysql-variables.env
+
     # - name: Create mysql-variables.env file
     #   run: |
     #     echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > mysql-variables.env
