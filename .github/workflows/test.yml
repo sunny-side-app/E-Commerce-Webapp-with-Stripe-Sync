@@ -44,7 +44,7 @@ jobs:
       run: |
         echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" > mysql-variables.env
         echo "MYSQL_APP_USER=${{ secrets.MYSQL_USER }}" >> mysql-variables.env
-        echo "MYSQL_APP_USER_PASSWORD=${{ secrets.MYSQL_APP_USER_PASSWORD }}" >> mysql-variables.env
+        echo "MYSQL_APP_USER_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> mysql-variables.env
     
     - name: Create .env file
       run: |
