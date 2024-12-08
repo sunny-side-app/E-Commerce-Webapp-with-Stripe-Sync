@@ -36,7 +36,8 @@ jobs:
     - name: Deploy to AWS EC2
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.PRODUCTION_SERVER_IP }} << 'EOF'
-          docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" -p "${{ secrets.DOCKER_HUB_PASSWORD }}"
+          echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+          scp .env ${{ secrets.EC2_USER }}@${{ secrets.PRODUCTION_SERVER_IP }}:/home/ubuntu/.env
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ecommerce-django:${{ github.sha }}
           docker stop ecommerce-web || true
           docker rm ecommerce-web || true
